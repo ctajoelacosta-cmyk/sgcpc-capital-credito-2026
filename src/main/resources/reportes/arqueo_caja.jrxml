@@ -1,0 +1,485 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- Arqueo y cierre de caja (D-93/D-94, docs/diseno_comprobantes_E8.md sección 5). Sin conteo por
+     billetes (decisión de Joel): solo el total contado. La clasificación de cada movimiento sale
+     del tipo del pago/desembolso que referencia (ServicioCaja.generarPdfArqueo), nunca de la
+     observación: este reporte no calcula ni clasifica nada (REGLAS_DESARROLLO.md §6). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="arqueo_caja" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <!-- Lote 2, L2-A Parte 2 (14/10/2026, pedido de Joel, autorizado): DOMICILIO/TELEFONO/
+         WHATSAPP, igual que el comprobante de desembolso. ServicioCaja.generarPdfArqueo ya los
+         pasa (mismo patrón D-94 que RAZON_SOCIAL/RUC de arriba). Logo: ya llega por Java en
+         TODAS las llamadas a llenarYExportar, sin tocar código. -->
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="ID_SESION" class="java.lang.Long"/>
+    <parameter name="CAJERA_NOMBRE" class="java.lang.String"/>
+    <!-- C22 (decisión de Joel, 03/11/2026): la línea de la firma del gerente llega ARMADA desde
+         Java (ServicioCaja.lineaRecibiDelArqueo). Dice "Recibí: [nombre]" solo cuando hay un
+         gerente registrado en esa sesión, y deja la firma en blanco cuando no. Antes la plantilla
+         le pegaba un "Recibí: " fijo a un nombre que podía no haber recibido nada.
+         Reemplaza al parámetro GERENTE_RECIBIO. -->
+    <parameter name="RECIBI_LINEA" class="java.lang.String"/>
+    <parameter name="APERTURA" class="java.lang.String"/>
+    <parameter name="CIERRE" class="java.lang.String"/>
+    <parameter name="FONDO_INICIAL" class="java.lang.String"/>
+    <!-- E-6 (pedido de Joel): entregas del gerente durante la sesión, antes sin línea propia
+         en el RESUMEN; por eso no cuadraba contra SALDO TEÓRICO. -->
+    <parameter name="CANT_ENTREGAS" class="java.lang.Integer"/>
+    <parameter name="MONTO_ENTREGAS" class="java.lang.String"/>
+    <parameter name="CANT_COBROS" class="java.lang.Integer"/>
+    <parameter name="MONTO_COBROS" class="java.lang.String"/>
+    <parameter name="TOTAL_REDONDEOS" class="java.lang.String"/>
+    <parameter name="TIENE_REDONDEOS" class="java.lang.Boolean"/>
+    <parameter name="CANT_ANTICIPOS" class="java.lang.Integer"/>
+    <parameter name="MONTO_ANTICIPOS" class="java.lang.String"/>
+    <parameter name="CANT_CANCELACIONES" class="java.lang.Integer"/>
+    <parameter name="MONTO_CANCELACIONES" class="java.lang.String"/>
+    <parameter name="CANT_VUELTOS" class="java.lang.Integer"/>
+    <parameter name="MONTO_VUELTOS" class="java.lang.String"/>
+    <parameter name="CANT_DESEMBOLSOS" class="java.lang.Integer"/>
+    <parameter name="MONTO_DESEMBOLSOS" class="java.lang.String"/>
+    <!-- E-6 (pedido de Joel): compensaciones por reversión, mismo motivo que las entregas:
+         también afectan el saldo teórico y no tenían línea propia. -->
+    <parameter name="CANT_COMPENSACIONES" class="java.lang.Integer"/>
+    <parameter name="MONTO_COMPENSACIONES" class="java.lang.String"/>
+    <parameter name="SALDO_TEORICO" class="java.lang.String"/>
+    <parameter name="EFECTIVO_CONTADO" class="java.lang.String"/>
+    <parameter name="DIFERENCIA" class="java.lang.String"/>
+    <parameter name="MOTIVO_DIFERENCIA" class="java.lang.String"/>
+    <!-- A4 (pedido de Joel): "Motivo de la diferencia" solo se muestra si hay diferencia; con
+         diferencia 0 no hay nada que explicar. -->
+    <parameter name="TIENE_DIFERENCIA" class="java.lang.Boolean"/>
+    <parameter name="TOTAL_APLICADO" class="java.lang.String"/>
+    <parameter name="EFECTIVO_NETO" class="java.lang.String"/>
+    <parameter name="COMPOSICION_CAPITAL" class="java.lang.String"/>
+    <parameter name="COMPOSICION_INTERES" class="java.lang.String"/>
+    <parameter name="COMPOSICION_MORATORIO" class="java.lang.String"/>
+    <parameter name="COMPOSICION_PUNITORIO" class="java.lang.String"/>
+    <parameter name="COMPOSICION_IVA" class="java.lang.String"/>
+    <parameter name="RANGO_RECIBOS" class="java.lang.String"/>
+    <parameter name="CANT_RECIBOS" class="java.lang.Integer"/>
+    <!-- A4 (pedido de Joel): "Recibos: — " cuando no hubo ninguno, mismo criterio que
+         Facturas/Constancias/Desembolsos (antes mostraba "Recibos: - (0)"). -->
+    <parameter name="TIENE_RECIBOS" class="java.lang.Boolean"/>
+    <parameter name="TIENE_FACTURAS" class="java.lang.Boolean"/>
+    <parameter name="NUMEROS_FACTURAS" class="java.lang.String"/>
+    <parameter name="CANT_FACTURAS" class="java.lang.Integer"/>
+    <parameter name="TOTAL_FACTURAS" class="java.lang.String"/>
+    <parameter name="TIENE_CONSTANCIAS" class="java.lang.Boolean"/>
+    <parameter name="NUMEROS_CONSTANCIAS" class="java.lang.String"/>
+    <parameter name="CANT_CONSTANCIAS" class="java.lang.Integer"/>
+    <parameter name="TIENE_DESEMBOLSOS" class="java.lang.Boolean"/>
+    <parameter name="NUMEROS_DESEMBOLSOS" class="java.lang.String"/>
+    <parameter name="CANT_DESEMBOLSOS_COMPROBANTE" class="java.lang.Integer"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+
+    <field name="hora" class="java.lang.String"/>
+    <field name="tipo" class="java.lang.String"/>
+    <field name="operacion" class="java.lang.String"/>
+    <field name="comprobante" class="java.lang.String"/>
+    <field name="monto" class="java.lang.String"/>
+
+    <title>
+        <!-- E-6 (pedido de Joel): +32 (2 líneas nuevas de 16 c/u: Entregas del gerente y
+             Compensaciones por reversión) sobre la altura original (530). Lote 2, L2-A
+             (14/10/2026, pedido de Joel): +49 más (logo, franja y título en 3 líneas en vez de
+             una sola), para que nada de lo que sigue se corte. -->
+        <band height="580">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <!-- Lote 2, L2-A Parte 3 (14/10/2026, pedido de Joel): encabezado igual al
+                 comprobante de desembolso: logo a la izquierda, datos de la empresa a la
+                 derecha del logo, alineados a la izquierda (antes centrados debajo del logo). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="330" height="44"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL} + " — RUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10/Lote 2 (pedido de Joel): franja de color institucional. -->
+            <rectangle>
+                <reportElement x="0" y="44" width="481" height="5" mode="Opaque" backcolor="#0C325C"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <!-- PA (pedido de Joel, Lote 2 L2-A): "Sesión N°" -> "Sesión N.º". -->
+            <textField>
+                <reportElement x="0" y="54" width="481" height="18" forecolor="#0C325C"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="12" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["ARQUEO Y CIERRE DE CAJA  —  Sesión N.º " + $P{ID_SESION}]]></textFieldExpression>
+            </textField>
+            <!-- PA (pedido de Joel, Lote 2 L2-A): "Cajero/a" -> "Cajera". -->
+            <textField>
+                <reportElement x="0" y="82" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Cajera: " + $P{CAJERA_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="98" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Apertura: " + $P{APERTURA} + "     Cierre: " + $P{CIERRE}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="122" width="481" height="16" backcolor="#DCDCDC"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[RESUMEN]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="140" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Fondo inicial]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="140" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{FONDO_INICIAL}]]></textFieldExpression>
+            </textField>
+            <!-- E-6 (pedido de Joel): entregas del gerente, ubicada justo después de "Fondo
+                 inicial", como pidió. -->
+            <textField>
+                <reportElement x="0" y="156" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["(+) Entregas del gerente (" + $P{CANT_ENTREGAS} + ")"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="156" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTO_ENTREGAS}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="172" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["(+) Cobros de cuotas (" + $P{CANT_COBROS} + ")"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="172" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTO_COBROS}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="188" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["(+) Anticipos de capital (" + $P{CANT_ANTICIPOS} + ")"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="188" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTO_ANTICIPOS}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="204" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["(+) Cancelaciones totales (" + $P{CANT_CANCELACIONES} + ")"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="204" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTO_CANCELACIONES}]]></textFieldExpression>
+            </textField>
+            <!-- PA (pedido de Joel, Lote 2 L2-A): signo doble: la etiqueta ya dice "(−)"; el
+                 monto ya viene formateado sin signo propio (no se le agrega otro "-" acá). -->
+            <textField>
+                <reportElement x="0" y="220" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["(−) Vueltos entregados (" + $P{CANT_VUELTOS} + ")"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="220" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTO_VUELTOS}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="236" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["(−) Desembolsos (" + $P{CANT_DESEMBOLSOS} + ")"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="236" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTO_DESEMBOLSOS}]]></textFieldExpression>
+            </textField>
+            <!-- E-6 (pedido de Joel): compensaciones por reversión, mismo motivo que las
+                 entregas (afecta el saldo teórico, signo -1, ver ServicioReversiones). PA: mismo
+                 arreglo del signo doble que Vueltos/Desembolsos. -->
+            <textField>
+                <reportElement x="0" y="252" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["(−) Compensaciones por reversión (" + $P{CANT_COMPENSACIONES} + ")"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="252" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{MONTO_COMPENSACIONES}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="270" width="360" height="16" backcolor="#E8E8E8"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[SALDO TEÓRICO]]></text>
+            </staticText>
+            <textField>
+                <reportElement mode="Opaque" x="360" y="270" width="121" height="16" backcolor="#E8E8E8"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{SALDO_TEORICO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="288" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[EFECTIVO CONTADO]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="288" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{EFECTIVO_CONTADO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="304" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[DIFERENCIA]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="304" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{DIFERENCIA}]]></textFieldExpression>
+            </textField>
+            <!-- Lote 2 L2-A, cuarto ajuste (pedido de Joel, 14/10/2026): mismo patrón que el
+                 redondeo (isRemoveLineWhenBlank + Float), para que con diferencia 0 (caso
+                 normal, sin motivo) no quede un hueco grande antes de la franja siguiente. -->
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement positionType="Float" isRemoveLineWhenBlank="true" x="0" y="320" width="481" height="14">
+                    <printWhenExpression><![CDATA[$P{TIENE_DIFERENCIA}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[!$P{TIENE_DIFERENCIA} ? null : "Motivo de la diferencia: " + $P{MOTIVO_DIFERENCIA}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement positionType="Float" mode="Opaque" x="0" y="342" width="481" height="16" backcolor="#DCDCDC"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[COMPOSICIÓN DE LO COBRADO]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="360" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Capital"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="360" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{COMPOSICION_CAPITAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="376" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Intereses compensatorios]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="376" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{COMPOSICION_INTERES}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="392" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Intereses moratorios]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="392" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{COMPOSICION_MORATORIO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="408" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Intereses punitorios]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="408" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{COMPOSICION_PUNITORIO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="424" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[IVA]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="424" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{COMPOSICION_IVA}]]></textFieldExpression>
+            </textField>
+            <!-- D-142 (corrección de Joel sobre D-141): el redondeo NO es un movimiento de efectivo
+                 (ya no se muestra en el RESUMEN, el saldo teórico nunca lo restó), acá es solo una
+                 conciliación informativa entre lo aplicado a la deuda y el efectivo neto recibido.
+                 Lote 2 L2-A, tercer ajuste (pedido de Joel, 14/10/2026): toda la cadena desde
+                 "Aplicado a deuda" hasta "Desembolsos" pasa a positionType="Float" (antes solo
+                 algunos), con espacios DECLARADOS ya chicos y deliberados entre cada elemento
+                 (8pt antes de cada franja/título, como el resto del reporte) en vez de depender
+                 de que Float "adivine" el espacio correcto. isRemoveLineWhenBlank (con la
+                 expresión devolviendo null) sigue en las 2 líneas condicionales de redondeo.
+                 Probado con sesión 2 (sin redondeo) y sesión 13 (con redondeo). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="440" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Aplicado a deuda: " + $P{TOTAL_APLICADO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement positionType="Float" isRemoveLineWhenBlank="true" x="0" y="456" width="481" height="14">
+                    <printWhenExpression><![CDATA[$P{TIENE_REDONDEOS}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[!$P{TIENE_REDONDEOS} ? null : "Redondeo a favor del cliente: -" + $P{TOTAL_REDONDEOS}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement positionType="Float" isRemoveLineWhenBlank="true" x="0" y="470" width="481" height="14">
+                    <printWhenExpression><![CDATA[$P{TIENE_REDONDEOS}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[!$P{TIENE_REDONDEOS} ? null : "Efectivo neto recibido: " + $P{EFECTIVO_NETO}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement positionType="Float" mode="Opaque" x="0" y="492" width="481" height="16" backcolor="#DCDCDC"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[COMPROBANTES EMITIDOS]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="510" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Recibos: " + ($P{TIENE_RECIBOS} ? $P{RANGO_RECIBOS} + "  (" + $P{CANT_RECIBOS} + ")" : "—")]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="526" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Facturas: " + ($P{TIENE_FACTURAS} ? $P{NUMEROS_FACTURAS} + "  (" + $P{CANT_FACTURAS} + ")  Total " + $P{TOTAL_FACTURAS} : "—")]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="542" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Constancias: " + ($P{TIENE_CONSTANCIAS} ? $P{NUMEROS_CONSTANCIAS} + "  (" + $P{CANT_CONSTANCIAS} + ")" : "—")]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="558" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Desembolsos: " + ($P{TIENE_DESEMBOLSOS} ? $P{NUMEROS_DESEMBOLSOS} + "  (" + $P{CANT_DESEMBOLSOS_COMPROBANTE} + ")" : "—")]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <pageHeader>
+        <band height="34">
+            <printWhenExpression><![CDATA[$V{PAGE_NUMBER}.intValue() != 1]]></printWhenExpression>
+            <textField>
+                <reportElement x="0" y="0" width="481" height="16"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL} + " — Sesión N.º " + $P{ID_SESION} + " (continuación)"]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="16">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="481" height="16" backcolor="#DCDCDC"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[DETALLE DE MOVIMIENTOS]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14">
+            <textField>
+                <reportElement x="0" y="0" width="80" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{hora}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="80" y="0" width="100" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{tipo}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="180" y="0" width="125" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{operacion}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="305" y="0" width="85" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{comprobante}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="390" y="0" width="91" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{monto}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- Lote 2 L2-A, quinto ajuste (pedido de Joel, 14/10/2026): "Emitido por"/"Página X de Y"
+         vivían en <summary>, que imprime UNA SOLA VEZ al final de todo el documento: en una
+         sesión de 2 páginas, la página 1 quedaba sin pie. Movido a pageFooter (se repite en
+         cada página); <summary> conserva solo las firmas (una sola vez, al cierre). -->
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{CAJERA_NOMBRE} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="331" y="0" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="0" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="54">
+            <line>
+                <reportElement x="0" y="20" width="180" height="1"/>
+            </line>
+            <line>
+                <reportElement x="300" y="20" width="180" height="1"/>
+            </line>
+            <staticText>
+                <reportElement x="0" y="24" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Cajera]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="24" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Gerente]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="40" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Entregado por: " + $P{CAJERA_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="300" y="40" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{RECIBI_LINEA}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

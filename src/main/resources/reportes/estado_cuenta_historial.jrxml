@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Subreporte del Estado de cuenta (RF34): "Historial de cobros", embebido en el summary de
+     estado_cuenta.jrxml (Float, para que lo que viene después, el subreporte de Gestiones,
+     se corra hacia abajo según el largo real). Sin título ni encabezado de empresa propios: el
+     padre ya los muestra una sola vez. Mismas filas que ya usa la pantalla (FilaHistorialCobranza),
+     sin un DTO nuevo. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="estado_cuenta_historial" pageWidth="762" pageHeight="595" columnWidth="762"
+              leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0"
+              whenNoDataType="NoDataSection" uuid="b2c3d4e5-0001-0001-0001-000000000001">
+
+    <field name="fechaHora" class="java.lang.String"/>
+    <field name="etiquetaTipo" class="java.lang.String"/>
+    <field name="numeroRecibo" class="java.lang.String"/>
+    <field name="montoAplicado" class="java.lang.String"/>
+    <field name="revertido" class="java.lang.Boolean"/>
+
+    <columnHeader>
+        <band height="18">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="110" height="18" backcolor="#DCDCDC" uuid="b2c3d4e5-0002-0002-0002-000000000001"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Fecha/hora]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="110" y="0" width="160" height="18" backcolor="#DCDCDC" uuid="b2c3d4e5-0002-0002-0002-000000000002"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Tipo]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="270" y="0" width="120" height="18" backcolor="#DCDCDC" uuid="b2c3d4e5-0002-0002-0002-000000000003"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Recibo]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="390" y="0" width="120" height="18" backcolor="#DCDCDC" uuid="b2c3d4e5-0002-0002-0002-000000000004"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Monto]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="510" y="0" width="100" height="18" backcolor="#DCDCDC" uuid="b2c3d4e5-0002-0002-0002-000000000005"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Revertido]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14">
+            <textField>
+                <reportElement x="0" y="0" width="110" height="14" uuid="b2c3d4e5-0003-0003-0003-000000000001"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{fechaHora}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="110" y="0" width="160" height="14" uuid="b2c3d4e5-0003-0003-0003-000000000002"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{etiquetaTipo}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="270" y="0" width="120" height="14" uuid="b2c3d4e5-0003-0003-0003-000000000003"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{numeroRecibo}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="390" y="0" width="120" height="14" uuid="b2c3d4e5-0003-0003-0003-000000000004"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{montoAplicado}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="510" y="0" width="100" height="14" uuid="b2c3d4e5-0003-0003-0003-000000000005"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{revertido} ? "Sí" : ""]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <noData>
+        <band height="14">
+            <staticText>
+                <reportElement x="0" y="0" width="400" height="14" uuid="b2c3d4e5-0004-0004-0004-000000000001"/>
+                <textElement><font fontName="DejaVu Sans" size="7" isItalic="true"/></textElement>
+                <text><![CDATA[Sin cobros registrados.]]></text>
+            </staticText>
+        </band>
+    </noData>
+</jasperReport>

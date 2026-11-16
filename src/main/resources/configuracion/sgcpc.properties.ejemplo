@@ -1,0 +1,8 @@
+# Portabilidad (pedido de Joel): copiar este archivo a ${catalina.base}/conf/sgcpc.properties
+# (la carpeta "conf" del Tomcat que usa este despliegue, NO dentro del .war) y completar los
+# datos reales de ESTA PostgreSQL -- así el .war no se recompila para cambiar de servidor.
+# Mismo formato que bd.properties; "entorno=pruebas" es opcional (solo para el cartel "BASE DE
+# PRUEBAS", nunca se infiere del nombre de la base).
+bd.url=jdbc:postgresql://localhost:5432/sgcpc_db
+bd.usuario=sgcpc_user
+bd.contrasena=

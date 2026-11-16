@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Constancia de reversión de cobro (RF25, Opción A, punto 2, pedido de Joel, 12/10/2026).
+     Documento interno (no fiscal, a diferencia de nota_anulacion.jrxml): deja constancia de la
+     devolución en efectivo al cliente cuando se autoriza la reversión de un cobro. Todos los
+     datos ya vienen calculados y formateados desde Java
+     (ServicioCobranza.generarPdfConstanciaReversion): este reporte no calcula ni recalcula nada
+     (REGLAS_DESARROLLO.md §6). Mismo encabezado/fuente/estilo que recibo.jrxml/nota_anulacion.jrxml. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="constancia_reversion" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <!-- Lote 2, L2-B (14/10/2026, pedido de Joel): encabezado unificado vía subreporte común
+         (encabezado_constancia.jrxml): ver ese archivo y REGLAS_DESARROLLO.md. El N.º pasa del
+         recuadro a la derecha (estilo anterior, distinto de cancelación/devolución) al mismo
+         bloque centrado debajo del título, para que las 3 constancias compartan un solo estilo.
+         Pie unificado en pageFooter más abajo ("Emitido por..." + "Página X de Y", mismo patrón
+         que contrato.jrxml); el "Emitido por" que vivía en el summary se quita de ahí (queda ese
+         hueco en blanco, sin tocar las firmas ni MARCA_REIMPRESION). Ningún dato ni texto legal
+         cambia, solo presentación. -->
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <parameter name="NUMERO_CONSTANCIA" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION_LARGA" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="NUMERO_RECIBO" class="java.lang.String"/>
+    <parameter name="MONTO_DEVUELTO" class="java.lang.String"/>
+    <parameter name="MOTIVO_SOLICITUD" class="java.lang.String"/>
+    <parameter name="SOLICITADO_POR" class="java.lang.String"/>
+    <parameter name="AUTORIZADO_POR" class="java.lang.String"/>
+    <parameter name="TIENE_FACTURA" class="java.lang.Boolean"/>
+    <parameter name="FACTURA_NUMERO" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="MONTO_DEVUELTO_LETRAS" class="java.lang.String"/>
+    <parameter name="MARCA_REIMPRESION" class="java.lang.String"/>
+
+    <title>
+        <band height="385">
+            <subreport>
+                <reportElement x="0" y="0" width="481" height="92"/>
+                <subreportParameter name="LOGO"><subreportParameterExpression><![CDATA[$P{LOGO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RAZON_SOCIAL"><subreportParameterExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RUC"><subreportParameterExpression><![CDATA[$P{EMPRESA_RUC}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_DOMICILIO"><subreportParameterExpression><![CDATA[$P{EMPRESA_DOMICILIO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_TELEFONO"><subreportParameterExpression><![CDATA[$P{EMPRESA_TELEFONO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_WHATSAPP"><subreportParameterExpression><![CDATA[$P{EMPRESA_WHATSAPP}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="TITULO"><subreportParameterExpression><![CDATA["CONSTANCIA DE REVERSIÓN DE COBRO"]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="NUMERO"><subreportParameterExpression><![CDATA[$P{NUMERO_CONSTANCIA}]]></subreportParameterExpression></subreportParameter>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
+                <subreportExpression class="java.io.InputStream"><![CDATA[Thread.currentThread().getContextClassLoader().getResourceAsStream("reportes/encabezado_constancia.jasper")]]></subreportExpression>
+            </subreport>
+            <textField>
+                <reportElement x="0" y="100" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Asunción, " + $P{FECHA_EMISION_LARGA}]]></textFieldExpression>
+            </textField>
+            <!-- Hallazgo propio (12/10/2026, al generar la muestra del punto 10): con el texto
+                 directo (punto 2) el párrafo pasa de 2 a 3 líneas; "Son:" quedaba pisado encima
+                 del párrafo con la altura vieja (40). Alto generoso (54, ~4 líneas) y todo lo de
+                 abajo corrido en consecuencia: posiciones FIJAS (no Float), mismo criterio ya
+                 documentado en recibo.jrxml para elementos que no son mutuamente excluyentes. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="120" width="481" height="54"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA["Por la presente, " + $P{EMPRESA_RAZON_SOCIAL} + " deja constancia de la devolución en "
++ "efectivo a " + $P{CLIENTE_NOMBRE} + ", C.I. N.º " + $P{CLIENTE_CEDULA}
++ ", por la reversión del cobro N.º " + $P{NUMERO_RECIBO} + " de la operación " + $P{IDENTIFICADOR_OPERACION} + "."]]></textFieldExpression>
+            </textField>
+            <!-- Punto 3 (RF25, pedido de Joel): monto en letras, debajo del párrafo. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="178" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Son: " + $P{MONTO_DEVUELTO_LETRAS} + "."]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="200" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[DATOS DE LA REVERSIÓN]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="216" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Recibo anulado: " + $P{NUMERO_RECIBO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="216" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Monto devuelto en efectivo: " + $P{MONTO_DEVUELTO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="232" width="481" height="28"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Motivo de la solicitud: " + $P{MOTIVO_SOLICITUD}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="264" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Solicitó (cajera): " + $P{SOLICITADO_POR}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="264" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Autorizó (gerente): " + $P{AUTORIZADO_POR}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="280" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Fecha y hora de la autorización: " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- Solo si el cobro revertido tenía factura (DNIT, RG 118/2017 / Decreto 6539/05;
+                 a confirmar con el contador cuál es la vigente, ver RF25 §10). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="296" width="481" height="28">
+                    <printWhenExpression><![CDATA[$P{TIENE_FACTURA}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Factura N.º " + $P{FACTURA_NUMERO} + " devuelta por el cliente y anulada; original y copias adjuntas."]]></textFieldExpression>
+            </textField>
+
+            <line>
+                <reportElement positionType="Float" x="0" y="330" width="481" height="1"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="338" width="481" height="28"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[Adjuntar a esta constancia el recibo original y, si corresponde, el original y todas las copias de la factura anulada.]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10 (pedido de Joel, 14/10/2026): ver la nota en constancia_cancelacion.jrxml
+                 (mismo patrón corregido, sin espacio de más). -->
+            <textField>
+                <reportElement x="331" y="0" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="0" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="140">
+            <line>
+                <reportElement x="0" y="10" width="140" height="1"/>
+            </line>
+            <line>
+                <reportElement x="170" y="10" width="140" height="1"/>
+            </line>
+            <line>
+                <reportElement x="340" y="10" width="140" height="1"/>
+            </line>
+            <!-- Punto 5 (RF25, pedido de Joel, 12/10/2026): nombre de quien firma, junto al rótulo;
+                 antes decía solo "Firma de la cajera"/etc., sin aclarar quién. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="14" width="140" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Firma de la cajera (" + $P{SOLICITADO_POR} + ")"]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="170" y="14" width="140" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Firma del gerente (" + $P{AUTORIZADO_POR} + ")"]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="340" y="14" width="140" height="28"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Firma del cliente (" + $P{CLIENTE_NOMBRE} + ", C.I. " + $P{CLIENTE_CEDULA} + ")"]]></textFieldExpression>
+            </textField>
+            <!-- Punto 4 (RF25, pedido de Joel): sin el punto final; MONTO_DEVUELTO ya termina en
+                 "Gs." (FormateadorNumeros.comoGuaranies); agregar otro punto daba "Gs..". -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="340" y="46" width="140" height="28"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Recibí conforme la devolución de " + $P{MONTO_DEVUELTO}]]></textFieldExpression>
+            </textField>
+            <!-- El "Emitido por" que vivía acá se movió al pageFooter (estilo único L2-B, 14/10/2026);
+                 queda este hueco en blanco entre las firmas y MARCA_REIMPRESION, sin tocar ninguna. -->
+            <!-- Punto 6 (RF25, pedido de Joel): mismo criterio que RF17/RF18 (ServicioDesembolso);
+                 la primera emisión no agrega nada acá, cada reimpresión posterior sí. -->
+            <textField isStretchWithOverflow="true" isBlankWhenNull="true">
+                <reportElement x="0" y="104" width="481" height="12">
+                    <printWhenExpression><![CDATA[$P{MARCA_REIMPRESION} != null && $P{MARCA_REIMPRESION}.length() > 0]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{MARCA_REIMPRESION}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Nota de anulación de factura (E9/Bloque 5, RF-41/DNIT RG 118/2017, decisión 3: anulación
+     simple en vez de Nota de Crédito formal; ver docs/diseno_bloque5_E9.md sección "Factura").
+     Corrección de Joel tras la prueba de la parte A del bloque 5 (punto F completo): timbrado,
+     detalle de la factura anulada (línea por concepto y cuota, con IVA), liquidación del IVA,
+     quién solicitó y quién autorizó, y el texto DNIT exacto. Mismo encabezado/fuente/formato que
+     factura.jrxml/constancia_cancelacion.jrxml (Bloque 2, E8). Se emite al autorizar la reversión
+     de un pago que tenía factura, con la casilla DNIT ya confirmada. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="nota_anulacion" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <!-- Lote 2, L2-A (14/10/2026, pedido de Joel): logo: ya llega por Java en TODAS las
+         llamadas a llenarYExportar (GeneradorInformesPdf.logoComoBytes), sin tocar
+         ServicioCobranza. Ningún dato legal se mueve: solo el bloque de texto de la izquierda
+         se corre de x=0 a x=50; el recuadro de TIMBRADO/NOTA N.º (x=291) queda donde está. -->
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="REPRESENTANTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="REPRESENTANTE_CEDULA" class="java.lang.String"/>
+    <parameter name="TIMBRADO_NUMERO" class="java.lang.String"/>
+    <parameter name="TIMBRADO_DESDE" class="java.lang.String"/>
+    <parameter name="TIMBRADO_HASTA" class="java.lang.String"/>
+    <parameter name="NUMERO_NOTA_ANULACION" class="java.lang.String"/>
+    <parameter name="FECHA_ANULACION" class="java.lang.String"/>
+    <parameter name="FECHA_ANULACION_LARGA" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="FACTURA_NUMERO" class="java.lang.String"/>
+    <parameter name="FACTURA_FECHA" class="java.lang.String"/>
+    <parameter name="FACTURA_TOTAL" class="java.lang.String"/>
+    <parameter name="NUMERO_RECIBO" class="java.lang.String"/>
+    <parameter name="MONTO_REVERTIDO" class="java.lang.String"/>
+    <parameter name="MOTIVO_REVERSION" class="java.lang.String"/>
+    <parameter name="SOLICITADO_POR" class="java.lang.String"/>
+    <parameter name="AUTORIZADO_POR" class="java.lang.String"/>
+    <parameter name="TOTAL_GRAVADA_5" class="java.lang.String"/>
+    <parameter name="IVA_5" class="java.lang.String"/>
+    <parameter name="TOTAL_GRAVADA_10" class="java.lang.String"/>
+    <parameter name="IVA_10" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+
+    <field name="descripcion" class="java.lang.String"/>
+    <field name="importeNeto" class="java.lang.String"/>
+    <field name="iva" class="java.lang.String"/>
+    <field name="total" class="java.lang.String"/>
+
+    <title>
+        <band height="345">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="240" height="52"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL} + " — RUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " — WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="291" y="0" width="190" height="52" mode="Opaque" backcolor="#E8E8E8"/>
+                <box leftPadding="6" topPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["TIMBRADO N.º " + $P{TIMBRADO_NUMERO}
++ "\nVigencia: " + $P{TIMBRADO_DESDE} + " al " + $P{TIMBRADO_HASTA}
++ "\n\nNOTA N.º " + $P{NUMERO_NOTA_ANULACION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10/Lote 2 (pedido de Joel): franja de color institucional, mismo criterio que
+                 las constancias. -->
+            <rectangle>
+                <reportElement x="0" y="54" width="481" height="5" mode="Opaque" backcolor="#0C325C"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="0" y="64" width="481" height="18" forecolor="#0C325C"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="12" isBold="true"/></textElement>
+                <text><![CDATA[NOTA DE ANULACIÓN DE FACTURA]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="88" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Asunción, " + $P{FECHA_ANULACION_LARGA}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="108" width="481" height="60"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA["Por la presente, " + $P{EMPRESA_RAZON_SOCIAL} + " deja constancia de la ANULACIÓN de la factura N.º "
++ $P{FACTURA_NUMERO} + ", emitida a nombre del/de la Sr./Sra. " + $P{CLIENTE_NOMBRE} + ", con C.I. N.º " + $P{CLIENTE_CEDULA}
++ ", en el marco de la reversión de un cobro sobre la operación " + $P{IDENTIFICADOR_OPERACION} + "."]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="174" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[DATOS DE LA FACTURA ANULADA]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="190" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Factura N.º: " + $P{FACTURA_NUMERO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="190" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Fecha: " + $P{FACTURA_FECHA}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="206" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Total facturado: " + $P{FACTURA_TOTAL}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="228" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[DATOS DE LA REVERSIÓN]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="244" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Recibo revertido: " + $P{NUMERO_RECIBO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="244" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Monto revertido: " + $P{MONTO_REVERTIDO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="260" width="481" height="28"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Motivo: " + $P{MOTIVO_REVERSION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="290" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Solicitó: " + $P{SOLICITADO_POR}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="290" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Autorizó: " + $P{AUTORIZADO_POR}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="314" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[CONCEPTOS ANULADOS]]></text>
+            </staticText>
+            <line>
+                <reportElement x="0" y="336" width="481" height="1"/>
+            </line>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="16">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="213" height="16" backcolor="#DCDCDC"/>
+                <box leftPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Concepto]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="213" y="0" width="90" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Neto]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="303" y="0" width="88" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[IVA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="391" y="0" width="90" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Total]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="213" height="14"/>
+                <box leftPadding="4"><pen lineWidth="0.25"/></box>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="213" y="0" width="90" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.25"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{importeNeto}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="303" y="0" width="88" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.25"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{iva}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="391" y="0" width="90" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.25"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <summary>
+        <band height="270">
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="6" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["LIQUIDACIÓN DEL IVA:   (5 %) " + $P{IVA_5} + "   (10 %) " + $P{IVA_10} + "   TOTAL IVA " + $P{IVA_10}]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="34" width="481" height="30"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["El original y todas las copias de la factura anulada quedan archivados junto a esta nota (DNIT, RG N° 118/2017)."]]></textFieldExpression>
+            </textField>
+
+            <line>
+                <reportElement positionType="Float" x="0" y="110" width="180" height="1"/>
+            </line>
+            <line>
+                <reportElement positionType="Float" x="300" y="110" width="180" height="1"/>
+            </line>
+            <textField>
+                <reportElement positionType="Float" x="0" y="114" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{REPRESENTANTE_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="0" y="128" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["C.I. N.º " + $P{REPRESENTANTE_CEDULA}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="142" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Representante legal]]></text>
+            </staticText>
+            <textField>
+                <reportElement positionType="Float" x="0" y="156" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="300" y="114" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Firma y aclaración (cliente)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" x="300" y="128" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[(si corresponde)]]></text>
+            </staticText>
+
+            <!-- PA-10 (pedido de Joel, Lote 2 L2-A): "Página X de Y" agregado, mismo patrón
+                 corregido que las constancias. -->
+            <textField>
+                <reportElement positionType="Float" x="0" y="188" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" x="331" y="188" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement positionType="Float" x="467" y="188" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

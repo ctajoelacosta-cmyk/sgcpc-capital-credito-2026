@@ -1,0 +1,53 @@
+# Maven
+target/
+
+# Conexión a la base (contiene contraseña real; usar bd.properties.ejemplo como plantilla)
+src/main/resources/configuracion/bd.properties
+
+# D-113: base dedicada al humo, y respaldo temporal de bd.properties mientras se usa esa base
+# (bd/usar_base_pruebas.sh / bd/usar_base_real.sh) -- usar bd.properties.pruebas.ejemplo como
+# plantilla.
+src/main/resources/configuracion/bd.properties.pruebas
+src/main/resources/configuracion/bd.properties.real
+
+# Copias de la base para entrega
+entrega/
+
+# D-117: registro local de bd/desbloquear_usuario.sh --restablecer (fecha, base, usuario,
+# motivo -- nunca contraseñas) -- operativo de cada máquina, no es parte del proyecto.
+bd/desbloquear_usuario.log
+
+# NetBeans (archivos locales del usuario, no del proyecto Maven)
+nbactions.xml
+nb-configuration.xml
+nbproject/private/
+
+# Instrucciones y configuracion local de desarrollo (no son parte del proyecto entregable)
+CLAUDE.md
+.claude/
+
+# B87/B86 (05/11/2026): carpeta de trabajo que crea Playwright en la raíz al sacar las capturas
+# antes/después de la pasada visual. Solo puede escribir dentro del proyecto, así que las capturas
+# nacen acá y de acá se copian a ..\pruebas\b86_capturas\ (fuera del repositorio, como el resto de
+# pruebas/ y evidencias/). Nada de lo que deja es parte del entregable.
+.playwright-mcp/
+
+# Otros IDE / SO
+.idea/
+*.iml
+.vscode/
+Thumbs.db
+.DS_Store
+
+# Paquete de entrega (war + base + bundle de git) -- se genera a mano, nunca se versiona
+entrega_v1.0-estable/
+entrega_final/
+entrega_v*/
+entrega_libro_*/
+
+# Resguardo personal de Joel (bundle de git + configuracion local + respaldo de la base) -- nunca
+# se versiona ni se entrega al docente, es solo para poder recuperar el proyecto
+resguardo_joel_v1.0-estable/
+
+# Respaldos de sgcpc_db_pruebas (dump de bd/respaldar_prueba.sh u otro) -- nunca se versiona
+respaldos/

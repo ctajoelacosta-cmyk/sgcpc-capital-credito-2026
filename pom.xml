@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>py.com.capitalcredito</groupId>
+  <artifactId>sgcpc</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <name>SGCPC</name>
+  <description>Sistema de Gestion de Creditos Personales y Cobranzas - Capital Credito</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.release>8</maven.compiler.release>
+  </properties>
+
+  <dependencies>
+    <!-- Servlet/JSP: los provee Tomcat 9 (Servlet 4.0 / JSP 2.3) -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>javax.servlet.jsp-api</artifactId>
+      <version>2.3.3</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Driver JDBC PostgreSQL -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.1</version>
+    </dependency>
+
+    <!-- Hash de contraseñas -->
+    <dependency>
+      <groupId>org.mindrot</groupId>
+      <artifactId>jbcrypt</artifactId>
+      <version>0.4</version>
+    </dependency>
+
+    <!-- JasperReports (E5, D-17/D-68): impresos (contrato, pagare, plan de pagos, y los
+         siguientes de etapas futuras). jasperreports-fonts trae DejaVu Sans ya empaquetada como
+         extension de fuentes (REGLAS_DESARROLLO.md 6: nunca Arial ni fuentes de Windows), registrada sola
+         con estar en el classpath, sin tocar nada mas. -->
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports</artifactId>
+      <version>6.20.6</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-fonts</artifactId>
+      <version>6.20.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
+      <version>3.0.22</version>
+    </dependency>
+
+    <!-- Pruebas -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>sgcpc</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <release>8</release>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.4.0</version>
+        <configuration>
+          <failOnMissingWebXml>true</failOnMissingWebXml>
+          <!-- Causa raíz del hallazgo de seguridad de la entrega del 26/10/2026
+               (docs/entregas/ENTREGA_SERVIDOR.md): bd.properties.real y bd.properties.pruebas son
+               archivos LOCALES de la PC de Joel (los tres están en .gitignore) que apuntan a
+               sgcpc_db y a sgcpc_db_pruebas con sus credenciales, y hasta ahora se empaquetaban
+               dentro del .war junto a bd.properties: en la entrega hubo que sacarlos a mano,
+               paso 2 del procedimiento. Acá se excluyen del .war de una vez.
+               Se excluyen SOLO del empaquetado: siguen estando en src/main/resources y en
+               target/classes, así que nada de lo local cambia (ni mvn test, ni el despliegue de
+               NetBeans, ni las herramientas que los usan para cambiar de base).
+               bd.properties SÍ viaja, a propósito: es el que lee la aplicación, y el script de
+               entrega (herramientas/preparar_war_entrega.sh) lo reemplaza por el del servidor. -->
+          <packagingExcludes>
+            WEB-INF/classes/configuracion/bd.properties.real,
+            WEB-INF/classes/configuracion/bd.properties.pruebas
+          </packagingExcludes>
+        </configuration>
+      </plugin>
+      <!-- API separada (12/11/2026, pedido del profesor): este proyecto publica, ademas del
+           .war, un JAR con sus clases compiladas, para que el proyecto sgcpc-api use los
+           servicios, DAO, modelos e infraestructura del SGCPC como dependencia. Asi la API no
+           duplica ni una regla de negocio: la unica copia sigue viviendo aca.
+
+           Se usa maven-jar-plugin con <excludes> y NO el <attachClasses> de maven-war-plugin,
+           porque attachClasses empaqueta target/classes COMPLETO y ahi estan bd.properties.real
+           y bd.properties.pruebas, los dos archivos locales con las credenciales de sgcpc_db y
+           de sgcpc_db_pruebas. El packagingExcludes de arriba los saca del .war, pero no de
+           target/classes: viajarian dentro del jar, en WEB-INF/lib, que es justo donde el
+           control de herramientas/preparar_war_entrega.sh NO mira (revisa WEB-INF/classes).
+           Seria el hallazgo de seguridad del 26/10/2026 otra vez, en un lugar nuevo.
+
+           Se excluye TODA la carpeta configuracion/, no solo los tres archivos conocidos: asi
+           el dia que alguien agregue un bd.properties.lo-que-sea, la guarda ya lo cubre. El
+           .war de sgcpc-api toma bd.properties del MISMO archivo de este proyecto, declarado
+           como <resource> en su pom (un solo dueño, los dos .war a la misma base).
+
+           Se quedan en el jar reportes/ y fuentes/: no son secretos y los necesitan los
+           servicios que generan PDF, para cuando la API los use. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.1</version>
+        <executions>
+          <execution>
+            <id>jar-de-clases-para-sgcpc-api</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <classifier>classes</classifier>
+              <excludes>
+                <exclude>configuracion/**</exclude>
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Precompila todas las JSP en cada "mvn package" y hace fallar el build si alguna
+           tiene un error (scriptlet/EL mal formado, import faltante, etc), para no depender
+           de encontrarlo recien en el navegador (ver AVANCE.md D-49). Las clases generadas van
+           a target/jsp-precompiladas (fuera de target/classes y de src/main/webapp), asi que
+           maven-war-plugin no las empaqueta en el .war: solo se usan para verificar. -->
+      <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-jspc-maven-plugin</artifactId>
+        <version>9.4.53.v20231009</version>
+        <executions>
+          <execution>
+            <id>verificar-jsp</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>jspc</goal>
+            </goals>
+            <configuration>
+              <webAppSourceDirectory>${project.basedir}/src/main/webapp</webAppSourceDirectory>
+              <webXml>${project.basedir}/src/main/webapp/WEB-INF/web.xml</webXml>
+              <generatedClasses>${project.build.directory}/jsp-precompiladas</generatedClasses>
+              <useProvidedScope>true</useProvidedScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

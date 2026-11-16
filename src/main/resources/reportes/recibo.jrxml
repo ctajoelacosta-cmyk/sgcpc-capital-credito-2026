@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Recibo de dinero (D-93/D-94, docs/diseno_comprobantes_E8.md sección 2). Documento interno, no
+     fiscal. Todos los importes/fechas/letras ya vienen calculados y formateados desde Java
+     (ServicioCobranza.generarPdfRecibo): este reporte no calcula ni recalcula nada (REGLAS_DESARROLLO.md §6).
+     L1 Paso 3a (pedido de Joel, piloto): escudo a la izquierda del bloque de empresa, el texto
+     corrido para no encimarse. Solo el escudo: el nombre ya va en EMPRESA_RAZON_SOCIAL.
+
+     REDISENO 29/10/2026, B83 + B58 (pedido del docente y de Joel, mismo motivo que la factura
+     el 27/10: "parecia una hoja impresa"). SOLO PRESENTACION: los mismos parametros, los mismos
+     campos, los mismos importes y las mismas ramas. Se aplica el patron ya aprobado en
+     factura.jrxml: recuadros enmarcados por bloque, grilla de la tabla pareja y ejemplares en dos
+     celdas.
+
+     Dos decisiones de geometria, para que esto no se rompa al tocarlo:
+       - Los textos NO se movieron: cada uno conserva su x/y/alto, que ya estaban verificados en
+         pantalla (incluida la separacion por rama de D-145/D-146, donde Float no servia). Lo
+         unico nuevo son los <rectangle> que los envuelven, dibujados ANTES que los textos.
+       - La franja "ANULADO POR REVERSION" sigue en el <pageHeader> condicional (RF25 punto 7):
+         cuando el recibo no esta revertido, esa banda no imprime y no ocupa espacio. Por eso la
+         grilla de la tabla NO se dibuja en el <background> a coordenadas fijas como en la
+         factura: el pageHeader correria todo hacia abajo y la grilla quedaria desalineada en un
+         recibo revertido. Aca la grilla sale de los <box> de cada celda, que siguen el flujo.
+
+     B58 (29/10/2026, decision de Joel): formato unico de ejemplares en los tres documentos,
+     "TIPO / DESTINATARIO" en dos celdas enmarcadas. El DESTINATARIO no cambia: factura y recibo,
+     el ORIGINAL es del cliente; el comprobante de desembolso, de la empresa (es el acuse de
+     recibo del efectivo, que la empresa archiva firmado). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="recibo" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <parameter name="NUMERO_RECIBO" class="java.lang.String"/>
+    <parameter name="FECHA_HORA" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="TIENE_FACTURA" class="java.lang.Boolean"/>
+    <parameter name="FACTURA_NUMERO" class="java.lang.String"/>
+    <parameter name="EFECTIVO_RECIBIDO" class="java.lang.String"/>
+    <parameter name="TIENE_VUELTO" class="java.lang.Boolean"/>
+    <parameter name="VUELTO" class="java.lang.String"/>
+    <parameter name="APLICADO" class="java.lang.String"/>
+    <parameter name="APLICADO_LETRAS" class="java.lang.String"/>
+    <!-- C37 (01/11/2026, decision de Joel): el "Son:" del recibo es el EFECTIVO RECIBIDO,
+         no el monto aplicado a la deuda. Con el redondeo de D-141 los dos no son el mismo
+         numero, y lo que el cliente firma haber entregado es lo recibido. Lo aplicado sigue
+         en su propio renglon (APLICADO), junto con el vuelto y el redondeo. -->
+    <parameter name="RECIBIDO_LETRAS" class="java.lang.String"/>
+    <parameter name="TIENE_REDONDEO" class="java.lang.Boolean"/>
+    <parameter name="REDONDEO" class="java.lang.String"/>
+    <parameter name="ES_CANCELACION" class="java.lang.Boolean"/>
+    <parameter name="ES_ANTICIPO" class="java.lang.Boolean"/>
+    <parameter name="TIENE_PROMESA" class="java.lang.Boolean"/>
+    <parameter name="PROMESA_FECHA" class="java.lang.String"/>
+    <parameter name="PROMESA_MONTO" class="java.lang.String"/>
+    <parameter name="ANTICIPO_INTERES" class="java.lang.String"/>
+    <parameter name="ANTICIPO_IVA" class="java.lang.String"/>
+    <parameter name="ANTICIPO_CAPITAL" class="java.lang.String"/>
+    <parameter name="ANTICIPO_CUOTAS_RESTANTES" class="java.lang.Integer"/>
+    <parameter name="ANTICIPO_CUOTA_NUEVA" class="java.lang.String"/>
+    <!-- D-145 (P-12, pedido de Joel): fecha y monto (con IVA incluido) de la próxima cuota. -->
+    <parameter name="ANTICIPO_PROXIMA_CUOTA_FECHA" class="java.lang.String"/>
+    <parameter name="ANTICIPO_PROXIMA_CUOTA_MONTO" class="java.lang.String"/>
+    <parameter name="ANTICIPO_ULTIMO_VENCIMIENTO" class="java.lang.String"/>
+    <parameter name="TOTAL_CAPITAL" class="java.lang.String"/>
+    <parameter name="TOTAL_INTERES" class="java.lang.String"/>
+    <parameter name="TOTAL_MORATORIO" class="java.lang.String"/>
+    <parameter name="TOTAL_PUNITORIO" class="java.lang.String"/>
+    <parameter name="TOTAL_IVA_CUOTAS" class="java.lang.String"/>
+    <parameter name="TOTAL_FILAS" class="java.lang.String"/>
+    <parameter name="SALDO_CAPITAL_DESPUES" class="java.lang.String"/>
+    <parameter name="CUOTAS_PENDIENTES" class="java.lang.Integer"/>
+    <parameter name="TIENE_PROXIMO_VENCIMIENTO" class="java.lang.Boolean"/>
+    <parameter name="PROXIMA_CUOTA" class="java.lang.String"/>
+    <parameter name="PROXIMO_VENCIMIENTO" class="java.lang.String"/>
+    <!-- D-145 (P-9): si la cuota que queda pendiente ya estaba vencida a la fecha de este pago
+         (típico después de un pago parcial, D-145 P-6), en vez de "próximo vencimiento" se avisa
+         que ya venció y cuánto resta de ella. -->
+    <parameter name="PROXIMA_CUOTA_VENCIDA" class="java.lang.Boolean"/>
+    <parameter name="PROXIMA_CUOTA_RESTA" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <!-- Punto 1 (RF25, hallazgo de Joel, 12/10/2026): un recibo de un pago REVERTIDO nunca sale
+         como válido: franja grande en toda la página, más el detalle de la reversión. -->
+    <parameter name="REVERTIDO" class="java.lang.Boolean"/>
+    <parameter name="REVERSION_FECHA" class="java.lang.String"/>
+    <parameter name="REVERSION_AUTORIZADO_POR" class="java.lang.String"/>
+    <parameter name="REVERSION_MOTIVO" class="java.lang.String"/>
+    <!-- Punto 7 (RF25, hallazgo de Joel en pantalla, 12/10/2026): sello diagonal (imagen generada
+         en Java, GeneradorInformesPdf.construirMarcaAguaDiagonal; JasperReports solo rota texto
+         en pasos de 90°, no en ángulo libre). -->
+    <parameter name="MARCA_AGUA" class="byte[]"/>
+
+    <field name="cuota" class="java.lang.String"/>
+    <field name="capital" class="java.lang.String"/>
+    <field name="interes" class="java.lang.String"/>
+    <field name="moratorio" class="java.lang.String"/>
+    <field name="punitorio" class="java.lang.String"/>
+    <field name="iva" class="java.lang.String"/>
+    <field name="total" class="java.lang.String"/>
+
+    <!-- Punto 7 (RF25, pedido de Joel): el sello diagonal cubre el cuerpo entero, en coordenadas
+         de página (detrás de todo lo demás), igual que el logo: onErrorType="Blank" para que
+         nunca rompa la generación si la imagen viniera null. La franja de arriba YA NO va acá
+         (tapaba el pie, recortable); se movió al pageHeader condicional, más abajo. -->
+    <background>
+        <band height="762">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="481" height="762">
+                    <printWhenExpression><![CDATA[$P{REVERTIDO}]]></printWhenExpression>
+                </reportElement>
+                <imageExpression><![CDATA[$P{MARCA_AGUA}]]></imageExpression>
+            </image>
+        </band>
+    </background>
+
+    <title>
+        <band height="146">
+            <!-- ===== Recuadro 1: emisor + identificacion del recibo ===== -->
+            <rectangle radius="6">
+                <reportElement mode="Transparent" x="0" y="0" width="481" height="70"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="8" y="6" width="42" height="42"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="56" y="4" width="268" height="62"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}
++ "\n" + $P{EMPRESA_CORREO}]]></textFieldExpression>
+            </textField>
+            <!-- Lote 2, L2-A (14/10/2026, pedido de Joel): mismo diseño (N.º a la derecha), con
+                 el color del sistema en el recuadro (antes gris #E8E8E8). -->
+            <!-- Celda del tipo de documento y su numero, dentro de su propio recuadro (patron de
+                 la factura). El azul institucional del Lote 2 se mantiene: es la marca del
+                 documento, no un adorno nuevo. -->
+            <rectangle radius="4">
+                <reportElement mode="Transparent" x="330" y="6" width="145" height="58"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="332" y="8" width="141" height="18" mode="Opaque" backcolor="#0C325C" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[RECIBO DE DINERO]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="332" y="28" width="141" height="16"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["N.º " + $P{NUMERO_RECIBO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="330" y="46" width="145" height="1"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#000000"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="332" y="48" width="141" height="14"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="6"/></textElement>
+                <text><![CDATA[Documento interno — no fiscal]]></text>
+            </staticText>
+            <!-- PA-10/Lote 2 (pedido de Joel, 14/10/2026): franja de color institucional en vez
+                 de la línea simple; "Asunción, fecha" sola en su línea, igual que el resto de
+                 los documentos del Lote 2 (antes compartía la línea con "Fecha: "). -->
+            <!-- ===== Recuadro 2: datos del cobro. Mismos cuatro renglones y mismas
+                 expresiones de siempre, ahora enmarcados y en dos columnas donde entra. ===== -->
+            <rectangle radius="4">
+                <reportElement mode="Transparent" x="0" y="78" width="481" height="60"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="6" y="83" width="236" height="13"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Asunción, " + $P{FECHA_HORA}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="245" y="83" width="230" height="13"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Operación: " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="99" width="481" height="1"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#B0B0B0"/></graphicElement>
+            </line>
+            <textField>
+                <reportElement x="6" y="102" width="336" height="13"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Cliente: " + $P{CLIENTE_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="345" y="102" width="130" height="13"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["C.I.: " + $P{CLIENTE_CEDULA}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="0" y="118" width="481" height="1"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#B0B0B0"/></graphicElement>
+            </line>
+            <textField>
+                <reportElement x="6" y="121" width="469" height="13"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Factura asociada: " + ($P{TIENE_FACTURA} ? $P{FACTURA_NUMERO} : "no corresponde (sin conceptos gravados)")]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <!-- Punto 7 (RF25, hallazgo de Joel en pantalla, 12/10/2026): la franja "ANULADO POR
+         REVERSIÓN" se movió del background (tapaba el pie, "ORIGINAL/COPIA" y "Emitido por",
+         recortable) a un pageHeader con printWhenExpression: cuando REVERTIDO es falso, la
+         banda entera no imprime y no ocupa ningún espacio (a diferencia de agregar los mismos
+         elementos dentro del title, que hubiera exigido darle más altura al title SIEMPRE,
+         revertido o no: un recibo NO revertido tiene que verse exactamente igual que antes). -->
+    <pageHeader>
+        <band height="64">
+            <printWhenExpression><![CDATA[$P{REVERTIDO}]]></printWhenExpression>
+            <staticText>
+                <reportElement x="0" y="0" width="481" height="26" mode="Opaque" backcolor="#8B0000" forecolor="#FFFFFF"/>
+                <box><pen lineWidth="2" lineColor="#4A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ANULADO POR REVERSIÓN]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="26" width="481" height="38" mode="Opaque" backcolor="#F5E0E0" forecolor="#8B0000"/>
+                <box leftPadding="4" rightPadding="4" topPadding="3"><pen lineColor="#8B0000" lineWidth="1"/></box>
+                <textElement><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <!-- Hallazgo propio (verificación del punto 7): REVERSION_MOTIVO es texto libre
+                     de la cajera, a veces ya termina en "."; separador " — " en vez de "." propio,
+                     para no arriesgar un "..", mismo criterio que la corrección de Joel en
+                     constancia_reversion.jrxml (punto 4, "Gs.."). -->
+                <textFieldExpression><![CDATA["Este cobro fue revertido el " + $P{REVERSION_FECHA}
++ " (autorizó: " + $P{REVERSION_AUTORIZADO_POR} + "). Motivo: " + $P{REVERSION_MOTIVO}
++ " — Este documento NO es válido como comprobante de pago."]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="16">
+            <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="45" height="16" backcolor="#DCDCDC"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Cuota]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="45" y="0" width="68" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Capital]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="113" y="0" width="68" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Interés]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="181" y="0" width="68" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Morat.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="249" y="0" width="68" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Punit.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="317" y="0" width="68" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[IVA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="385" y="0" width="96" height="16" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Total]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14">
+            <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+            <textField>
+                <reportElement x="0" y="0" width="45" height="14"/>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{cuota}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="45" y="0" width="68" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{capital}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="113" y="0" width="68" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{interes}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="181" y="0" width="68" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{moratorio}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="249" y="0" width="68" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{punitorio}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="317" y="0" width="68" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{iva}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="385" y="0" width="96" height="14"/>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <summary>
+        <band height="260">
+            <!-- ===== Recuadros del rediseno (B83). Van primero, debajo de los textos: cada uno
+                 envuelve un bloque que YA existia, sin moverlo. ===== -->
+            <rectangle radius="4">
+                <reportElement mode="Transparent" x="0" y="18" width="481" height="56">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <rectangle radius="4">
+                <reportElement mode="Transparent" x="0" y="18" width="481" height="152">
+                    <printWhenExpression><![CDATA[$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <rectangle radius="4">
+                <reportElement mode="Transparent" x="0" y="76" width="481" height="58">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <rectangle radius="4">
+                <reportElement mode="Transparent" x="0" y="176" width="481" height="30"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+
+            <!-- Fila TOTAL de la tabla de cuotas (NORMAL/PARCIAL/CANCELACION). -->
+            <staticText>
+                <reportElement key="totalLabel" positionType="Float" mode="Opaque" x="0" y="0" width="45" height="16" backcolor="#DCDCDC">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <box><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[TOTAL]]></text>
+            </staticText>
+            <textField>
+                <reportElement positionType="Float" mode="Opaque" x="45" y="0" width="68" height="16" backcolor="#DCDCDC">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_CAPITAL}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" mode="Opaque" x="113" y="0" width="68" height="16" backcolor="#DCDCDC">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_INTERES}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" mode="Opaque" x="181" y="0" width="68" height="16" backcolor="#DCDCDC">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_MORATORIO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" mode="Opaque" x="249" y="0" width="68" height="16" backcolor="#DCDCDC">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_PUNITORIO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" mode="Opaque" x="317" y="0" width="68" height="16" backcolor="#DCDCDC">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_IVA_CUOTAS}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement positionType="Float" mode="Opaque" x="385" y="0" width="96" height="16" backcolor="#DCDCDC">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <box rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_FILAS}]]></textFieldExpression>
+            </textField>
+
+            <!-- Variante anticipo: sin tabla de cuotas. Posiciones FIJAS (sin Float): "Efectivo
+                 recibido"/"Son:" de acá abajo se duplican para cada rama (anticipo/no anticipo,
+                 más abajo) en vez de compartir una sola posición Float, encontrado en la
+                 verificación offline de este mismo bloque: Float no reubicaba el segundo elemento
+                 cuando los dos compartían el mismo Y con printWhenExpression mutuamente
+                 excluyentes (quedaban superpuestos), así que la separación por rama tiene que ser
+                 explícita, no automática. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="22" width="469" height="92">
+                    <printWhenExpression><![CDATA[$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <!-- D-145 (P-12/P-14, pedido de Joel): agrega la línea de la próxima cuota (con
+                     IVA incluido) y pluraliza "cuota(s) restante(s)" en singular/plural.
+                     Corrección de Joel (380b400, punto B5): se sacó "cuota " + ANTICIPO_CUOTA_NUEVA
+                     (capital+interés SIN IVA, 473.140 en la prueba real) porque confundía con la
+                     línea de abajo (la misma cuota, pero con IVA, 482.025): dos números para el
+                     mismo concepto. Queda un solo monto ("Próxima cuota"), aclarando que ya
+                     incluye IVA. ANTICIPO_CUOTA_NUEVA sigue calculándose en ServicioCobranza (no
+                     se tocó, cambio mínimo) aunque ya no se imprime acá. -->
+                <textFieldExpression><![CDATA["Anticipo de capital: " + $P{ANTICIPO_CAPITAL}
++ "  –  Interés del período en curso: " + $P{ANTICIPO_INTERES}
++ "  –  IVA: " + $P{ANTICIPO_IVA}
++ "\n\nResumen del plan regenerado: " + $P{ANTICIPO_CUOTAS_RESTANTES}
++ ($P{ANTICIPO_CUOTAS_RESTANTES}.intValue() == 1 ? " cuota restante" : " cuotas restantes")
++ ", nuevo último vencimiento " + $P{ANTICIPO_ULTIMO_VENCIMIENTO} + "."
++ "\nPróxima cuota (IVA incluido): " + $P{ANTICIPO_PROXIMA_CUOTA_FECHA} + " por " + $P{ANTICIPO_PROXIMA_CUOTA_MONTO}
++ "\nSaldo de capital después del pago: " + $P{SALDO_CAPITAL_DESPUES}]]></textFieldExpression>
+            </textField>
+
+            <!-- Efectivo recibido / vuelto / aplicado, con el vuelto siempre visible (aunque sea
+                 0 Gs., pedido de Joel): variante NO anticipo, justo después de la tabla de
+                 cuotas (fija, siempre 16 de alto cuando imprime). -->
+            <!-- D-141: altura fija en 32 (2 líneas) siempre que no es anticipo, porque "Redondeo"
+                 solo agrega texto cuando corresponde, pero reservar el espacio evita que la fila
+                 de abajo ("Son:", fija) se superponga si esta línea llega a ajustar a 2 renglones. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="22" width="469" height="32">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Efectivo recibido: " + $P{EFECTIVO_RECIBIDO}
++ "      Vuelto: " + $P{VUELTO}
++ "      Aplicado: " + $P{APLICADO}
++ ($P{TIENE_REDONDEO} ? "      Redondeo: -" + $P{REDONDEO} : "")]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="54" width="469" height="16">
+                    <printWhenExpression><![CDATA[!$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Son: " + $P{RECIBIDO_LETRAS} + "."]]></textFieldExpression>
+            </textField>
+
+            <!-- Variante anticipo, justo después del bloque de arriba (y=20, alto fijo 92, P-12
+                 agregó una línea, así que empieza en 116). D-146 (pedido de Joel): vuelve a
+                 mostrar "Efectivo recibido"/"Vuelto"/"Aplicado", porque confirmarAnticipoCapital
+                 ya guarda el efectivo físico real y el vuelto real por separado (antes mostraba
+                 solo "Monto aplicado", D-145/P-13, porque el servicio no los distinguía). Nunca
+                 hay redondeo en un adelanto (D-141 no aplica a este camino), así que no hace
+                 falta el segmento condicional de "Redondeo" que sí tiene la variante no-anticipo. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="116" width="469" height="32">
+                    <printWhenExpression><![CDATA[$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Efectivo recibido: " + $P{EFECTIVO_RECIBIDO}
++ "      Vuelto: " + $P{VUELTO}
++ "      Aplicado: " + $P{APLICADO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="150" width="469" height="16">
+                    <printWhenExpression><![CDATA[$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Son: " + $P{RECIBIDO_LETRAS} + "."]]></textFieldExpression>
+            </textField>
+
+            <!-- Promesa (solo si hay gestión vinculada con seguridad, D-95). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="78" width="469" height="16">
+                    <printWhenExpression><![CDATA[$P{TIENE_PROMESA}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Promesa de pago: " + $P{PROMESA_FECHA} + " por " + $P{PROMESA_MONTO}
++ " (más la mora que corra hasta la fecha de pago)"]]></textFieldExpression>
+            </textField>
+
+            <!-- Cancelación: leyenda fija. -->
+            <staticText>
+                <reportElement x="6" y="96" width="469" height="18">
+                    <printWhenExpression><![CDATA[$P{ES_CANCELACION}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="11" isBold="true"/></textElement>
+                <text><![CDATA[PRÉSTAMO CANCELADO]]></text>
+            </staticText>
+
+            <!-- Normal/parcial: saldo, cuotas pendientes, próximo vencimiento. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="96" width="469" height="16">
+                    <printWhenExpression><![CDATA[!$P{ES_CANCELACION} && !$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Saldo de capital después del pago: " + $P{SALDO_CAPITAL_DESPUES}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="6" y="114" width="469" height="16">
+                    <printWhenExpression><![CDATA[!$P{ES_CANCELACION} && !$P{ES_ANTICIPO}]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Cuotas pendientes: " + $P{CUOTAS_PENDIENTES}
++ (!$P{TIENE_PROXIMO_VENCIMIENTO} ? ""
+    : ($P{PROXIMA_CUOTA_VENCIDA}
+        ? "     Cuota " + $P{PROXIMA_CUOTA} + " vencida el " + $P{PROXIMO_VENCIMIENTO} + " — resta " + $P{PROXIMA_CUOTA_RESTA}
+        : "     Próximo vencimiento: cuota " + $P{PROXIMA_CUOTA} + " – " + $P{PROXIMO_VENCIMIENTO}))]]></textFieldExpression>
+            </textField>
+
+            <!-- Firmas. D-146 (pedido de Joel): bajadas de y=166 a y=182 (+16), porque la
+                 variante anticipo volvió a tener 2 líneas en "Efectivo recibido"/"Vuelto"/
+                 "Aplicado" (antes 1 sola, "Monto aplicado", D-145/P-13 ya revertido). -->
+            <line>
+                <reportElement x="20" y="192" width="160" height="1"/>
+            </line>
+            <line>
+                <reportElement x="300" y="192" width="160" height="1"/>
+            </line>
+            <!-- B108 (B86, tramo 4): el campo medía 180 pt y el nombre no entraba. JasperReports
+                 no recorta, corta en seco (B83), así que se leía "Firma de la cajera (Sofía
+                 Martínez" sin cerrar el paréntesis.
+                 Medido contra el dato real, no estimado: los 171 recibos emitidos son todos de
+                 "Sofía Martínez" (frase de 35 caracteres, la que ya se cortaba) y el peor caso
+                 POSIBLE es de 38, "Firma de la cajera (Joel Jesús Acosta)", porque el
+                 ADMINISTRADOR tiene nivel TOTAL en todos los permisos (ServicioAutorizacion) y
+                 puede cobrar y firmar un recibo.
+                 Pasa de 180 a 200 pt arrancando en x=0: así el centro del campo sigue en 100, el
+                 mismo que el de la línea de firma (x=20, ancho 160), y queda centrado como antes.
+                 200 es el máximo que conserva ese centro, porque x no puede ser negativo. Las
+                 LÍNEAS de firma no se tocan, así que en el papel no se mueve nada: lo único que
+                 cambia es que el nombre deja de cortarse. El ancho se verificó renderizando la
+                 frase de 38 caracteres, no multiplicando caracteres por puntos. -->
+            <textField>
+                <reportElement x="0" y="193" width="200" height="12"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Firma de la cajera (" + $P{USUARIO_EMISOR} + ")"]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="290" y="193" width="180" height="12"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Firma del cliente]]></text>
+            </staticText>
+            <!-- B58 (29/10/2026, decision de Joel): ejemplares en dos celdas enmarcadas, mismo
+                 formato "TIPO — DESTINATARIO" que factura.jrxml y comprobante_desembolso.jrxml.
+                 El destinatario no cambia: en el recibo, el ORIGINAL es del cliente. -->
+            <staticText>
+                <reportElement x="0" y="212" width="240" height="14"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ORIGINAL — CLIENTE]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="240" y="212" width="241" height="14"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[COPIA — ARCHIVO CAPITAL CRÉDITO]]></text>
+            </staticText>
+            <!-- PA-10 (pedido de Joel, Lote 2 L2-A): "Página X de Y" agregado junto al pie, mismo
+                 patrón corregido que las constancias (campo del total alineado a la izquierda,
+                 sin espacio de más). -->
+            <textField>
+                <reportElement x="0" y="228" width="300" height="12"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="331" y="228" width="136" height="12"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="228" width="14" height="12"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>

@@ -1,0 +1,8 @@
+# Entrega para el servidor de la institucion (Ubuntu 24.04 / PostgreSQL 16 / Tomcat 9.0.123).
+# Apunta a la base "proyecto_final" con el usuario "app_user" (no superusuario), creados por el
+# tecnico siguiendo INSTALACION.md. La contrasena la define el tecnico sin recompilar -- ver
+# INSTALACION.md, paso "Contrasena de la base", que explica las 2 formas de completarla.
+bd.url=jdbc:postgresql://localhost:5432/proyecto_final
+bd.usuario=app_user
+bd.contrasena=
+entorno=produccion

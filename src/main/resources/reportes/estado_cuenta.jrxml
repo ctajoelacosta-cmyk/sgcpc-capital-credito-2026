@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Estado de cuenta (RF34, auditoría de impresión del 13/10/2026, pedido de Joel): antes se
+     imprimía con window.print() sobre la propia pantalla (Decisión 3, Bloque 4/E8); la regla
+     del proyecto es que todo documento impreso sale en PDF generado con JasperReports, con el
+     mismo encabezado común (logo, empresa, "Emitido por", "Página N de M") que el resto. Un solo
+     préstamo por informe (nunca una lista con filtros, a diferencia de los demás informes de este
+     bloque): el encabezado muestra la operación en su lugar de "Filtros aplicados".
+     Datasource principal = CUOTAS (Plan de pagos, detail repite una vez por cuota, mismo patrón
+     que cualquier otro informe de este sistema). "Historial de cobros" y "Gestiones de cobranza"
+     van de SUBREPORTE en el summary (estado_cuenta_historial.jrxml/estado_cuenta_gestiones.jrxml):
+     se probó primero con el componente List de JasperReports (jr:list) para las tres tablas, pero
+     un List no empuja correctamente a los elementos Float que vienen después cuando se estira
+     (confirmado con un harness de prueba, PDF con todo superpuesto); un subreporte sí lo hace
+     bien (patrón estándar, probado). Los dos subreportes se compilan aparte (mismo
+     compilar_reportes.sh, que ya recorre todo el directorio) y se cargan una sola vez como
+     JasperReport desde el classpath (ver ServicioInformes, mismo criterio que el LOGO cacheado
+     de GeneradorInformesPdf). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="estado_cuenta" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="762"
+              leftMargin="40" rightMargin="40" topMargin="30" bottomMargin="30"
+              whenNoDataType="AllSectionsNoDetail" uuid="a1b2c3d4-e5f6-4a1b-8c2d-1a2b3c4d5e6f">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="ESTADO_ETIQUETA" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="CLIENTE_TELEFONO" class="java.lang.String"/>
+    <parameter name="MONTO_APROBADO" class="java.lang.String"/>
+    <parameter name="PLAZO_TEXTO" class="java.lang.String"/>
+    <parameter name="TEA" class="java.lang.String"/>
+    <parameter name="SALDO_CAPITAL" class="java.lang.String"/>
+    <parameter name="TOTAL_PAGADO" class="java.lang.String"/>
+    <parameter name="MONTO_EXIGIBLE_HOY" class="java.lang.String"/>
+    <parameter name="AVISO_PLAN" class="java.lang.String"/>
+    <parameter name="HISTORIAL" class="java.util.List"/>
+    <parameter name="GESTIONES" class="java.util.List"/>
+    <parameter name="SUBREPORT_HISTORIAL" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="SUBREPORT_GESTIONES" class="net.sf.jasperreports.engine.JasperReport"/>
+
+    <field name="numeroCuota" class="java.lang.Integer"/>
+    <field name="fechaVencimiento" class="java.lang.String"/>
+    <field name="capital" class="java.lang.String"/>
+    <field name="interes" class="java.lang.String"/>
+    <field name="iva" class="java.lang.String"/>
+    <field name="total" class="java.lang.String"/>
+    <field name="estado" class="java.lang.String"/>
+    <field name="fechaPago" class="java.lang.String"/>
+    <field name="numeroRecibo" class="java.lang.String"/>
+
+    <title>
+        <band height="200">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42" uuid="a1b2c3d4-0001-0001-0001-000000000001"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="712" height="40" uuid="a1b2c3d4-0001-0001-0001-000000000002"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="46" width="762" height="1" uuid="a1b2c3d4-0001-0001-0001-000000000003"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="52" width="762" height="20" uuid="a1b2c3d4-0001-0001-0001-000000000004"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ESTADO DE CUENTA]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="76" width="762" height="14" uuid="a1b2c3d4-0001-0001-0001-000000000005"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Operación " + $P{IDENTIFICADOR_OPERACION} + "  ·  " + $P{ESTADO_ETIQUETA}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="92" width="762" height="14" uuid="a1b2c3d4-0001-0001-0001-000000000006"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{CLIENTE_NOMBRE} + "  ·  C.I. " + $P{CLIENTE_CEDULA} + "  ·  Tel. " + $P{CLIENTE_TELEFONO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="108" width="762" height="14" uuid="a1b2c3d4-0001-0001-0001-000000000007"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Monto aprobado: " + $P{MONTO_APROBADO} + "  ·  Plazo: " + $P{PLAZO_TEXTO} + "  ·  TEA: " + $P{TEA}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="124" width="762" height="14" uuid="a1b2c3d4-0001-0001-0001-000000000008"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Saldo de capital: " + $P{SALDO_CAPITAL} + "   Total pagado: " + $P{TOTAL_PAGADO} + "   Monto exigible hoy: " + $P{MONTO_EXIGIBLE_HOY}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="142" width="762" height="14" uuid="a1b2c3d4-0001-0001-0001-000000000009"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Emitido: " + $P{FECHA_EMISION} + "  ·  Usuario: " + $P{USUARIO_EMISOR}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="164" width="762" height="16" uuid="a1b2c3d4-0001-0001-0001-00000000000a"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[Plan de pagos]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="182" width="762" height="14" uuid="a1b2c3d4-0001-0001-0001-00000000000b">
+                    <printWhenExpression><![CDATA[$P{AVISO_PLAN} != null && !$P{AVISO_PLAN}.isEmpty()]]></printWhenExpression>
+                </reportElement>
+                <textElement><font fontName="DejaVu Sans" size="8" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{AVISO_PLAN}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="18">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="35" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000001"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Cuota]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="35" y="0" width="75" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000002"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Vencimiento]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="110" y="0" width="95" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000003"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Capital]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="205" y="0" width="95" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000004"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Interés]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="300" y="0" width="75" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000005"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[IVA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="375" y="0" width="95" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000006"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Total]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="470" y="0" width="70" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000007"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Estado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="540" y="0" width="222" height="18" backcolor="#DCDCDC" uuid="a1b2c3d4-0002-0002-0002-000000000008"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Pagada el / Recibo]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14">
+            <textField>
+                <reportElement x="0" y="0" width="35" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000001"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{numeroCuota}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="35" y="0" width="75" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000002"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{fechaVencimiento}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="110" y="0" width="95" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000003"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{capital}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="205" y="0" width="95" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000004"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{interes}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="300" y="0" width="75" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000005"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{iva}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="375" y="0" width="95" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000006"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="470" y="0" width="70" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000007"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="540" y="0" width="222" height="14" uuid="a1b2c3d4-0003-0003-0003-000000000008"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{fechaPago} == null ? "" : ($F{fechaPago} + " — " + $F{numeroRecibo})]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="500" height="14" uuid="a1b2c3d4-0009-0009-0009-000000000001"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="600" y="0" width="148" height="14" uuid="a1b2c3d4-0009-0009-0009-000000000002"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="748" y="0" width="14" height="14" uuid="a1b2c3d4-0009-0009-0009-000000000003"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="400">
+            <staticText>
+                <reportElement positionType="Float" x="0" y="0" width="762" height="16" uuid="a1b2c3d4-0001-0001-0001-00000000000c"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[Historial de cobros]]></text>
+            </staticText>
+            <subreport>
+                <reportElement positionType="Float" x="0" y="18" width="762" height="32" uuid="a1b2c3d4-0005-0005-0005-000000000001"/>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($P{HISTORIAL})]]></dataSourceExpression>
+                <subreportExpression class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{SUBREPORT_HISTORIAL}]]></subreportExpression>
+            </subreport>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="54" width="762" height="16" uuid="a1b2c3d4-0001-0001-0001-00000000000d"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[Gestiones de cobranza]]></text>
+            </staticText>
+            <subreport>
+                <reportElement positionType="Float" x="0" y="72" width="762" height="32" uuid="a1b2c3d4-0005-0005-0005-000000000002"/>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($P{GESTIONES})]]></dataSourceExpression>
+                <subreportExpression class="net.sf.jasperreports.engine.JasperReport"><![CDATA[$P{SUBREPORT_GESTIONES}]]></subreportExpression>
+            </subreport>
+        </band>
+    </summary>
+</jasperReport>

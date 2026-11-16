@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Pagaré a la orden (D-70, docs/diseno_reportes_e5.md, aprobado por Joel). Ningún cálculo
+     acá: todo llega ya calculado/formateado desde ServicioFormalizacion (REGLAS_DESARROLLO.md §6). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="pagare" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <parameter name="EMPRESA_REGISTRO_BCP" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="FECHA_FORMALIZACION" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="CLIENTE_DOMICILIO" class="java.lang.String"/>
+    <parameter name="PLAZO_MESES" class="java.lang.Integer"/>
+    <parameter name="ULTIMA_FECHA_VENCIMIENTO" class="java.lang.String"/>
+    <parameter name="TOTAL_A_PAGAR" class="java.lang.String"/>
+    <parameter name="TOTAL_A_PAGAR_LETRAS" class="java.lang.String"/>
+    <parameter name="CUOTAS_ALERTA_GARANTE" class="java.lang.Integer"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <!-- Lote 2, L2-C (14/10/2026, pedido de Joel, autorizado): logo: ya llega por Java en
+         TODAS las llamadas a llenarYExportar, sin tocar código. -->
+    <parameter name="LOGO" class="byte[]"/>
+
+    <pageHeader>
+        <!-- Corrección de Joel (ítem 1, segunda vuelta): letterhead a 6 líneas FIJAS (una por
+             dato) en vez de dos datos por línea concatenados: ya no se parte de forma
+             impredecible ni cruza la raya. isStretchWithOverflow lo deja crecer si algún dato
+             individual igual se envuelve; la raya usa positionType="Float" con margen fijo, así
+             que si el letterhead crece la raya baja con él (mismo patrón que contrato.jrxml). -->
+        <band height="80">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="280" height="66"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}
++ "\n" + $P{EMPRESA_CORREO}
++ "\nRegistro BCP: " + $P{EMPRESA_REGISTRO_BCP}]]></textFieldExpression>
+            </textField>
+            <!-- Lote 2, L2-C (pedido de Joel): recuadro "PAGARÉ"/N.º en el color del sistema,
+                 igual que el de recibo.jrxml (antes gris #E8E8E8). -->
+            <staticText>
+                <reportElement x="331" y="0" width="150" height="16" mode="Opaque" backcolor="#0C325C" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[PAGARÉ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="331" y="17" width="150" height="16" mode="Opaque" backcolor="#0C325C" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["N.º " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10/Lote 2 (pedido de Joel): franja de color institucional en vez de la línea
+                 simple. -->
+            <rectangle>
+                <reportElement positionType="Float" x="0" y="68" width="481" height="5" mode="Opaque" backcolor="#0C325C"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+        </band>
+    </pageHeader>
+
+    <detail>
+        <!-- splitType="Prevent" (corrección de Joel, ítem 6): el pagaré nunca se parte a mitad de
+             página. positionType="Float" en cascada (ítem 5/8): el bloque de firma sube hasta
+             pegarse al texto real en vez de dejar el hueco fijo que reportó Joel. -->
+        <band height="480" splitType="Prevent">
+
+            <rectangle>
+                <reportElement x="0" y="0" width="481" height="450"/>
+            </rectangle>
+
+            <!-- Lote 2, L2-C (pedido de Joel): el título se queda donde está, solo pasa al azul
+                 del sistema. -->
+            <staticText>
+                <reportElement x="20" y="14" width="230" height="20" forecolor="#0C325C"/>
+                <textElement><font fontName="DejaVu Sans" size="14" isBold="true"/></textElement>
+                <text><![CDATA[PAGARÉ A LA ORDEN]]></text>
+            </staticText>
+            <!-- Corrección de Joel (ítem 8): "N.º CC-2026-00002" en una sola línea. -->
+            <textField>
+                <reportElement x="260" y="14" width="205" height="16"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["N.º " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="280" y="34" width="185" height="18"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="12" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_A_PAGAR}]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="20" y="66" width="440" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA["Vence el " + $P{ULTIMA_FECHA_VENCIMIENTO} + "."]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="20" y="90" width="440" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA["Lugar y fecha de emisión: Asunción, " + $P{FECHA_FORMALIZACION} + "."]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="20" y="118" width="440" height="90"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <!-- A.1 (consolidación, pedido de Joel): TOTAL_A_PAGAR_LETRAS ahora ya incluye la
+                     palabra "GUARANÍES"/"DE GUARANÍES" (ConversorNumerosALetras.comoLetrasConGuaranies,
+                     ServicioFormalizacion), así que acá ya NO se antepone "GUARANÍES " a mano
+                     (quedaba duplicado: "GUARANÍES CINCO MILLONES DE GUARANÍES"). -->
+                <textFieldExpression><![CDATA["Pagaré sin protesto a " + $P{EMPRESA_RAZON_SOCIAL} + " (RUC " + $P{EMPRESA_RUC} + "), o a su orden, en su domicilio de " + $P{EMPRESA_DOMICILIO} + ", la suma de " + $P{TOTAL_A_PAGAR_LETRAS} + " (" + $P{TOTAL_A_PAGAR} + "), por igual valor recibido en préstamo a mi entera satisfacción."]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="20" y="212" width="440" height="120"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA["Este pagaré se emite en garantía del Contrato de Préstamo N.º " + $P{IDENTIFICADOR_OPERACION} + ", pagadero en " + $P{PLAZO_MESES} + " cuotas según el Plan de Pagos. La falta de pago de " + $P{CUOTAS_ALERTA_GARANTE} + " cuotas vencidas producirá el vencimiento anticipado de este pagaré por el saldo adeudado. En caso de mora se aplicarán los intereses moratorios y punitorios pactados en el contrato. Se renuncia al protesto y a la presentación para el pago. Para todos los efectos, las partes se someten a la jurisdicción de los tribunales de Asunción."]]></textFieldExpression>
+            </textField>
+
+            <!-- Firma única del DEUDOR, centrada: columna de 180 centrada dentro del ancho
+                 útil de 481. -->
+            <line>
+                <reportElement positionType="Float" x="150" y="340" width="180" height="1"/>
+            </line>
+
+            <staticText>
+                <reportElement positionType="Float" x="150" y="344" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[DEUDOR (librador)]]></text>
+            </staticText>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="150" y="358" width="180" height="40"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{CLIENTE_NOMBRE} + " — C.I. " + $P{CLIENTE_CEDULA} + "\nDomicilio: " + $P{CLIENTE_DOMICILIO}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10 (pedido de Joel, Lote 2 L2-C): "de" sin espacio final, total alineado a la
+                 izquierda: mismo patrón corregido que el resto de los documentos. -->
+            <textField>
+                <reportElement x="331" y="0" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="0" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

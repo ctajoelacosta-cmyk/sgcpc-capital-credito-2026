@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Requisitos para solicitar un préstamo (mejora de pantalla, Precalificación, pedido de Joel):
+     botón "Imprimir requisitos" de la ficha de cliente, habilitado en cuanto se elige la
+     situación laboral. Puramente informativo: ServicioClientes.generarInformeRequisitosPdf no
+     persiste nada, ni siquiera si todavía no hay nombre/cédula escritos (quedan líneas para
+     completar a mano, mismo criterio que cotizacion.jrxml con el interesado). Mismo estilo V9
+     (logo, colores de marca, encabezado de empresa con teléfono/WhatsApp) que cotizacion.jrxml;
+     un solo título band, sin tabla de detalle, como constancia_devolucion.jrxml. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="requisitos_prestamo" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              uuid="e5f6a7b8-6006-6006-6006-600000000001">
+
+    <!-- V9 (mismos 4 colores que cotizacion.jrxml/informe_historial_parametros). -->
+    <style name="TituloInforme" forecolor="#0C325C" fontName="DejaVu Sans" fontSize="13" isBold="true"/>
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="SITUACION_LABORAL" class="java.lang.String"/>
+    <parameter name="NOMBRE_INTERESADO" class="java.lang.String"/>
+    <parameter name="CEDULA_INTERESADO" class="java.lang.String"/>
+    <parameter name="DOCUMENTOS" class="java.lang.String"/>
+    <parameter name="CONDICIONES" class="java.lang.String"/>
+
+    <title>
+        <band height="420">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42" uuid="e5f6a7b8-6006-6006-6006-60000000000b"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="431" height="46" uuid="e5f6a7b8-6006-6006-6006-600000000002"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="50" width="481" height="1" uuid="e5f6a7b8-6006-6006-6006-600000000003"/>
+                <graphicElement><pen lineColor="#1B9B6A"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="55" width="481" height="20" style="TituloInforme" uuid="e5f6a7b8-6006-6006-6006-600000000004"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[REQUISITOS PARA SOLICITAR UN PRÉSTAMO]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="77" width="481" height="14" uuid="e5f6a7b8-6006-6006-6006-600000000006"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Situación laboral: " + $P{SITUACION_LABORAL}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="93" width="481" height="14" uuid="e5f6a7b8-6006-6006-6006-600000000007"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{NOMBRE_INTERESADO} + "   ·   " + $P{CEDULA_INTERESADO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="109" width="481" height="1" uuid="e5f6a7b8-6006-6006-6006-600000000008"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="116" width="481" height="14" uuid="e5f6a7b8-6006-6006-6006-600000000009"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[Documentos a presentar]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="132" width="481" height="50" uuid="e5f6a7b8-6006-6006-6006-60000000000a"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{DOCUMENTOS}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="184" width="481" height="14" uuid="e5f6a7b8-6006-6006-6006-60000000000c"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[Condiciones generales]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="200" width="481" height="80" uuid="e5f6a7b8-6006-6006-6006-60000000000d"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{CONDICIONES}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="284" width="481" height="24" uuid="e5f6a7b8-6006-6006-6006-60000000000e"/>
+                <textElement><font fontName="DejaVu Sans" size="8" isItalic="true"/></textElement>
+                <text><![CDATA[Documento informativo, no constituye aprobación del crédito. Las condiciones finales dependen de la evaluación crediticia.]]></text>
+            </staticText>
+<!-- Mejora de pantalla (pedido de Joel): el usuario/fecha de emisión aparecía arriba Y acá;
+                 se saca la línea de arriba, queda solo este pie, mismo criterio que el resto de
+                 los comprobantes (constancia_devolucion.jrxml, etc.). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="310" width="481" height="14" uuid="e5f6a7b8-6006-6006-6006-60000000000f"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+</jasperReport>

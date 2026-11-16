@@ -1,0 +1,1880 @@
+/*
+ * V6 (pedido de Joel): estilo general del sistema -- SOLO visual. Se carga en cabecera.jsp
+ * DESPUÉS de Bootstrap, AdminLTE y el <style> propio de la barra lateral/superior (V3/V4), así
+ * que gana por orden sin necesitar !important salvo donde Bootstrap ya lo usa en la propia
+ * regla que se quiere pisar. Colores, todos del logo: azul #0C325C (hover #0A2A4E), verde
+ * #1B9B6A (hover #14724E), verde claro #34D399, grises #F1F5F9 / #E2E8F0 / #475569.
+ *
+ * Todo el archivo va adentro de @media screen a propósito: así ninguna de estas reglas puede
+ * aplicarse nunca en una impresión/vista previa de impresión (Joel: "que lo impreso siga
+ * igual"), sin tener que revisar página por página si hay un @media print propio en algún lado
+ * -- alcanza con que estas reglas no existan para ese medio.
+ *
+ * NO toca: las .small-box del panel (no llevan la clase .card), la barra lateral/superior (ya
+ * cerradas en V3/V4, vive en el <style> de cabecera.jsp) ni el login (acceso.jsp es una página
+ * aislada que no incluye este archivo).
+ */
+@media screen {
+
+    /* 1. Títulos de pantalla: el <h1> de arriba de cada página interna (no hay .content-header
+       en este sistema -- se agrega el selector igual, por si se usara alguna vez). */
+    .content-wrapper h1,
+    .content-header h1 {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 700;
+        color: #0C325C;
+        font-size: 28px;
+    }
+
+    /* 2. Botones -- mismas clases de siempre, mismo significado, solo cambia el color. Reglas
+       compartidas por TODOS los botones primero (radio, tipografía, transición y el "levantarse"
+       1px con sombra leve al pasar el mouse); después, el color de cada variante. */
+    .btn {
+        border-radius: 8px;
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        transition: background-color .2s ease, border-color .2s ease, color .2s ease,
+            transform .15s ease, box-shadow .15s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(12, 50, 92, .15);
+    }
+
+    .btn-primary {
+        background-color: #0C325C;
+        border-color: #0C325C;
+    }
+
+    /* Mejora de pantalla (Precalificación, pedido de Joel): el encabezado "bg-primary" de
+       Bootstrap es un azul genérico y además viene con !important (utilidad de color), así que
+       hace falta pisarlo acá -- mismo azul de marca que .btn-primary/.badge-primary/etc, ya
+       arriba. Hoy solo lo usa la caja de Precalificación de clientes/ficha.jsp. */
+    .bg-primary {
+        background-color: #0C325C !important;
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus,
+    .btn-primary:active {
+        background-color: #0A2A4E;
+        border-color: #0A2A4E;
+    }
+
+    .btn-outline-primary {
+        color: #0C325C;
+        border-color: #0C325C;
+    }
+
+    .btn-outline-primary:hover,
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active {
+        background-color: #0C325C;
+        border-color: #0C325C;
+        color: #fff;
+    }
+
+    /* V11 (corrección de Joel): "Limpiar" (.btn-outline-secondary, en todas las barras de
+       filtros) se rellenaba de gris oscuro de Bootstrap al presionarlo (:active) -- mismo gris
+       oscuro que su :hover por defecto, ninguno de los dos pensado para esta paleta. Los dos
+       pasan a un gris clarito (el mismo fondo para ambos estados, como pidió Joel), nunca el
+       gris oscuro con texto blanco de Bootstrap. Mismo selector que usa Bootstrap para :active
+       (con los :not(), misma especificidad) para ganarle de forma segura. */
+    .btn-outline-secondary:hover,
+    .btn-outline-secondary:focus {
+        color: #334155;
+        background-color: #F1F5F9;
+        border-color: #CBD5E1;
+    }
+
+    .btn-outline-secondary:not(:disabled):not(.disabled).active,
+    .btn-outline-secondary:not(:disabled):not(.disabled):active {
+        color: #334155;
+        background-color: #E2E8F0;
+        border-color: #CBD5E1;
+    }
+
+    .btn-success {
+        background-color: #1B9B6A;
+        border-color: #1B9B6A;
+    }
+
+    .btn-success:hover,
+    .btn-success:focus,
+    .btn-success:active {
+        background-color: #14724E;
+        border-color: #14724E;
+    }
+
+    /* .btn-info: verde azulado sobrio en vez del celeste eléctrico de Bootstrap -- se usa en
+       "Ver/editar", "Cierre documental", etc. */
+    .btn-info {
+        background-color: #E6F4EF;
+        border-color: #B7E4D0;
+        color: #14724E;
+    }
+
+    .btn-info:hover,
+    .btn-info:focus,
+    .btn-info:active {
+        background-color: #D7EEE3;
+        border-color: #9DD9BC;
+        color: #14724E;
+    }
+
+    /* .btn-danger/.btn-warning/.btn-outline-danger: se quedan rojos/ámbar (avisan peligro), solo
+       un poco más suaves que el rojo/ámbar puro de Bootstrap -- sin cambiar cuál es cuál. */
+    .btn-danger {
+        background-color: #D64545;
+        border-color: #D64545;
+    }
+
+    .btn-danger:hover,
+    .btn-danger:focus,
+    .btn-danger:active {
+        background-color: #B83A3A;
+        border-color: #B83A3A;
+    }
+
+    .btn-outline-danger {
+        color: #C0392B;
+        border-color: #D64545;
+    }
+
+    .btn-outline-danger:hover,
+    .btn-outline-danger:focus,
+    .btn-outline-danger:active {
+        background-color: #D64545;
+        border-color: #D64545;
+        color: #fff;
+    }
+
+    .btn-warning {
+        background-color: #F0AD2E;
+        border-color: #F0AD2E;
+        color: #5C3D00;
+    }
+
+    .btn-warning:hover,
+    .btn-warning:focus,
+    .btn-warning:active {
+        background-color: #DB9A1F;
+        border-color: #DB9A1F;
+        color: #5C3D00;
+    }
+
+    /* 2b. B87 (hallazgo de Joel el 28/10/2026 en la devolución del pagaré; se resuelve dentro de
+       B86, tramo transversal): UN SOLO estilo de botón deshabilitado para todo el sistema, nunca
+       un parche por pantalla.
+
+       Qué pasaba antes. Bootstrap y AdminLTE traen, los dos, el color de cada variante repetido
+       para el estado deshabilitado -- `.btn-primary.disabled,.btn-primary:disabled{background-
+       color:#007bff}` y sus hermanas -- más un `opacity:.65` general. Resultado: el botón del
+       paso 3 quedaba verde claro (parecía tocable), el del paso 2 conservaba su borde azul, y
+       "Registrar cliente" en el alta de cliente volvía al AZUL GENÉRICO de Bootstrap (#007bff),
+       más vivo que el azul de marca (#0C325C) del botón habilitado de al lado: el deshabilitado
+       llamaba más la atención que el habilitado.
+
+       Qué hace esta regla. Todas las variantes (primary/success/info/danger/warning/outline-*,
+       y cualquiera que se agregue) caen en el mismo gris plano, sin hover, sin sombra, sin
+       levantarse, con `cursor: not-allowed` -- el lenguaje que GUIA_VISUAL.md §4 ya fijó para
+       "sin permiso" (atenuado + not-allowed + el motivo en el `title`).
+
+       Dos decisiones que conviene dejar escritas:
+       - `opacity: 1` es deliberado, no un olvido: hay que DECLARARLO para anular el `.65` de
+         Bootstrap/AdminLTE. Con ese .65 encima, el rótulo del botón queda en 2,4:1 de contraste
+         sobre el fondo -- ilegible. El gris plano de acá da 4,3:1 (#64748B sobre #F1F5F9): se lee
+         qué botón es, y aun así nadie lo confunde con uno activo. §4 usa opacidad .45 para el
+         ítem de menú sin permiso, que es un <span> de una palabra; un botón lleva una frase.
+       - Sin `!important`: este archivo se carga en cabecera.jsp DESPUÉS de Bootstrap y AdminLTE,
+         y los selectores empatan en especificidad (0,2,0) con `.btn-primary:disabled`, así que
+         gana por orden.
+
+       `fieldset:disabled button.btn`/`input.btn` van aparte, y nombran el elemento a propósito:
+       adentro de un fieldset deshabilitado el control no lleva el atributo propio (lo hereda), y
+       así queda escrito cuál es el caso -- "Registrar cliente" dentro de #restoFormularioFicha en
+       el alta de cliente. Verificado en pantalla el 10/11/2026: ese <button> SÍ matchea
+       `:disabled` aunque no tenga el atributo, así que la primera regla ya lo cubría; se lo nombra
+       igual para que el caso quede a la vista.
+
+       Lo que NO entra acá es un <a class="btn"> encerrado (B109, 10/11/2026): no es un control de
+       formulario, el fieldset no lo deshabilita y nunca matchea `:disabled`. Pintarlo de gris lo
+       mostraba apagado cuando lo único que le pasaba era que Bootstrap y AdminLTE le mataban el
+       clic -- ver la regla de B109 más abajo. */
+    .btn:disabled,
+    .btn.disabled,
+    fieldset:disabled button.btn,
+    fieldset:disabled input.btn {
+        background-color: #F1F5F9;
+        border-color: #E2E8F0;
+        color: #64748B;
+        opacity: 1;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    /* Sin hover, que es lo que lo hacía parecer tocable: no se levanta, no cambia de color y no
+       proyecta sombra. Se nombran los tres estados a propósito -- en Chrome `:hover` SÍ matchea
+       un <button disabled>, así que sin esto el `.btn:hover` de arriba y el `.btn-success:hover`
+       de Bootstrap seguían corriendo sobre un botón apagado. */
+    .btn:disabled:hover,
+    .btn:disabled:focus,
+    .btn:disabled:active,
+    .btn.disabled:hover,
+    .btn.disabled:focus,
+    .btn.disabled:active,
+    fieldset:disabled button.btn:hover,
+    fieldset:disabled button.btn:focus,
+    fieldset:disabled button.btn:active,
+    fieldset:disabled input.btn:hover,
+    fieldset:disabled input.btn:focus,
+    fieldset:disabled input.btn:active {
+        background-color: #F1F5F9;
+        border-color: #E2E8F0;
+        color: #64748B;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* B109 (hallazgo del 05/11/2026 al probar B87; aprobado por Joel el 10/11/2026): un enlace
+       encerrado en un fieldset deshabilitado vuelve a responder al clic. Bootstrap y AdminLTE
+       traen los dos `a.btn.disabled,fieldset:disabled a.btn{pointer-events:none}`, y eso dejaba
+       MUERTO el "Volver" del alta de cliente (clientes/ficha.jsp) -- la única salida de la
+       pantalla, justo en el estado en que más se necesita (el alta sin calificar). Un fieldset
+       deshabilita los CONTROLES que contiene; la navegación no es un control: el enlace no manda
+       el formulario, solo sale de la pantalla.
+
+       `a.btn.disabled` se deja intacto a propósito -- ahí el apagado lo pide la pantalla, no el
+       fieldset. Y el enlace recupera su aspecto normal de botón secundario por la regla de arriba,
+       que ya no lo nombra: tiene que VERSE activo, porque lo está.
+
+       Sin `!important`: misma especificidad (0,1,2) que la regla vendorizada, y este archivo se
+       carga después de Bootstrap y AdminLTE (cabecera.jsp), así que gana por orden. */
+    fieldset:disabled a.btn {
+        pointer-events: auto;
+    }
+
+    /* El "por qué está deshabilitado". B87 pide que el botón apagado venga acompañado del motivo,
+       no solo apagado: el TEXTO es de cada pantalla (cada una sabe qué falta), acá vive únicamente
+       su aspecto, para que se lea igual en todo el sistema. Va inmediatamente encima del botón,
+       en el mismo lugar donde el usuario busca el botón (mismo criterio que el renglón de motivos
+       de la tarjeta de cobro, D-145). El ⊘ sale de Font Awesome 5 Free, ya vendorizada en
+       recursos/fontawesome -- nada de internet. */
+    .motivo-deshabilitado {
+        color: #64748B;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .motivo-deshabilitado::before {
+        content: "\f05e";
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 11px;
+        margin-right: 6px;
+        color: #94A3B8;
+    }
+
+    /* 3. Tablas. */
+    .table thead th {
+        background-color: #F1F5F9;
+        color: #0C325C;
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        border-bottom-width: 1px;
+    }
+
+    .table td,
+    .table th {
+        border-color: #E2E8F0;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #F8FAFC;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(241, 245, 249, .4);
+    }
+
+    /* V3 (Usuarios, encontrado probando D-151): varios botones/formularios de acción en la
+       misma celda -- sin esto son varios "inline-block" sueltos que Bootstrap apila uno por
+       renglón apenas no entran. Como grupo flex, fluyen compactos y envuelven en bloque. */
+    .acciones-usuario {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    /* V1 (Parámetros, encontrado probando D-151): la columna "Valor" tiene un techo de ancho
+       -- sin esto, un valor largo sin espacios (ej. situaciones laborales admitidas, 101
+       caracteres) fuerza a toda la tabla a desbordar la pantalla. Con el techo, los valores
+       cortos siguen compactos (nunca lo alcanzan) y solo el valor largo se parte dentro de su
+       propia celda, sin empujar a las demás columnas. */
+    .valor-parametro {
+        max-width: 260px;
+        overflow-wrap: break-word;
+    }
+
+    /* B128 (11/11/2026, revisión final de pantallas): el número de la operación NO se parte.
+       Medido a 1280x800 antes del cambio: 199 de 199 filas en Solicitudes, 118 de 118 en
+       Préstamos, 29 de 29 en Mora, 20 de 20 en Reversiones y 346 de 346 en el informe de Cobros
+       mostraban el código en dos o tres renglones ("SOL-2026-" / "0199"), que es justo la columna
+       por la que el usuario busca. Va por clase y no sobre la primera columna de toda tabla,
+       porque no en todos los listados el código es la primera columna. */
+    .celda-codigo {
+        white-space: nowrap;
+    }
+
+    /* B128: variante compacta para las tablas de informe de MUCHAS columnas (el de Cobros tiene
+       13). Medido a 1280x800, con el contenedor en 912 px: antes la tabla pedía 1065 px y el
+       borde derecho de la columna TOTAL caía en 1006, o sea FUERA de la vista -- el usuario no
+       veía cuánto se cobró sin arrastrar la tabla. Con esta clase (y con los códigos ya sin
+       partirse, que suman ancho) la tabla pide 953 y TOTAL termina en 896: entra. La única que
+       queda afuera es CAJERA, la última, a 41 px de arrastre. Se aplica solo a las tablas que lo
+       necesitan y no a .table-sm en general, que la usan también las fichas (plan de pagos,
+       historial de cobros) donde el tamaño actual está bien.
+
+       B143 (11/11/2026) le agregó un segundo usuario: el plan de pagos DEL COTIZADOR, que desde
+       el rediseño vive en una columna de 589 px y no en el ancho entero. O sea que la frase de
+       arriba sigue valiendo para las fichas, pero "el tamaño actual está bien" depende del ancho
+       que la tabla tenga, no de qué tabla sea: al mover una tabla a un contenedor más angosto hay
+       que volver a medirla. */
+    .tabla-informe-ancha {
+        font-size: 13px;
+    }
+
+    .tabla-informe-ancha th,
+    .tabla-informe-ancha td {
+        padding: .2rem;
+    }
+
+    /* 4. Tarjetas -- :not(.small-box) de más, por las dudas: el panel ya usa un widget distinto
+       (small-box, sin la clase .card), pero así esta regla nunca lo alcanza aunque cambiara. */
+    .card:not(.small-box) {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(12, 50, 92, .06);
+    }
+
+    .card:not(.small-box) > .card-header {
+        background-color: transparent;
+        border-bottom: 1px solid #E2E8F0;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .card:not(.small-box) > .card-header .card-title {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        color: #0C325C;
+    }
+
+    /* 5. Formularios. */
+    .form-control,
+    select.form-control,
+    .custom-select {
+        border-radius: 8px;
+        border-color: #CBD5E1;
+    }
+
+    .form-control:focus,
+    .custom-select:focus {
+        border-color: #1B9B6A;
+        box-shadow: 0 0 0 4px rgba(27, 155, 106, .15);
+    }
+
+    label {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    /* 6. Avisos -- estilo suave (fondo claro, borde izquierdo de 4px del color del aviso), igual
+       que el login. .alert-info usa el mismo verde azulado de .btn-info, por lo mismo: nada de
+       celeste eléctrico, que no es un color del logo. */
+    .alert {
+        border: none;
+        border-left: 4px solid;
+        border-radius: 8px;
+    }
+
+    .alert-success {
+        background-color: #EAFBF3;
+        border-left-color: #1B9B6A;
+        color: #14724E;
+    }
+
+    .alert-danger {
+        background-color: #FDEEEC;
+        border-left-color: #D64545;
+        color: #A4312A;
+    }
+
+    .alert-warning {
+        background-color: #FFF8E6;
+        border-left-color: #E6A700;
+        color: #8a5a00;
+    }
+
+    /* RF08 (pedido de Joel, 11/10/2026): franja "naranja" para el riesgo alto (clasificación
+       D/E de Informconf) -- distinta de .alert-warning (ambar, usada para avisos genéricos),
+       para que el gerente la distinga de un vistazo de la roja (mora) y de la ambar. */
+    .alert-riesgo-alto {
+        background-color: #FFEADA;
+        border-left-color: #FF8C00;
+        color: #99550A;
+    }
+
+    .alert-info {
+        background-color: #E6F4EF;
+        border-left-color: #1B9B6A;
+        color: #14724E;
+    }
+
+    /* B206 (15/11/2026, hallazgo de Joel al probar la tanda 1 de Informes): .alert-secondary era
+       el UNICO aviso que este bloque no definia, asi que caia en la regla de AdminLTE
+       (.alert-secondary{color:#fff;background-color:#6c757d}) -- gris oscuro solido, con texto
+       blanco y sin la franja izquierda: la unica alerta del sistema que no se parecia a las
+       demas. Se veia "muy oscuro, como un bg-secondary", y era exactamente eso.
+
+       Ahora sigue el mismo estilo suave que las otras cinco, con los grises que la paleta de B110
+       ya usa (#F1F5F9 de fondo, #94A3B8 de franja, #475569 de texto -- el gris del cuerpo).
+       Contraste del texto sobre el fondo: 7,4:1, arriba del 4,5:1 que pide WCAG 2.1 AA.
+
+       Alcance: corrige los 18 .alert-secondary del sistema, no solo los 7 que cambio B206 --
+       incluido el "No hay operaciones registradas con esos filtros" de Auditoria, que ya era
+       oscuro antes de esta tanda. Es un arreglo de raiz en el dueño de la paleta, no un cambio de
+       clase en siete vistas. */
+    .alert-secondary {
+        background-color: #F1F5F9;
+        border-left-color: #94A3B8;
+        color: #475569;
+    }
+
+    /* Badges: forma de píldora. V7 (pedido de Joel): colores de marca para success/primary/info
+       -- igual que .btn-info, .badge-info usa el verde azulado sobrio en vez del celeste de
+       Bootstrap. warning/danger quedan con su rol (sin cambio de color). */
+    .badge {
+        border-radius: 999px;
+    }
+
+    .badge-success {
+        background-color: #1B9B6A;
+        color: #fff;
+    }
+
+    .badge-primary {
+        background-color: #0C325C;
+        color: #fff;
+    }
+
+    .badge-info {
+        background-color: #E6F4EF;
+        color: #14724E;
+    }
+
+    /* 7. Paginación. */
+    .page-link {
+        color: #0C325C;
+    }
+
+    .page-link:hover {
+        color: #0A2A4E;
+    }
+
+    .page-item.active .page-link {
+        background-color: #0C325C;
+        border-color: #0C325C;
+    }
+
+    /* V7 (pedido de Joel), punto 1: pestañas (.nav-tabs/.nav-pills) DENTRO del contenido -- con
+       .content-wrapper por delante a propósito, porque el menú lateral también usa nav-pills
+       (ver menu.jsp, ".nav nav-pills nav-sidebar") y esto nunca debe alcanzarlo. Pills (ej. la
+       ficha de cliente, Datos/Expediente/Buró): la activa con fondo azul y texto blanco. Tabs
+       con borde (si se usan en algún lado): la activa con el mismo azul en el texto y un
+       subrayado verde de 3px en vez del fondo. SIN recuadro al hacer clic -- :focus directo,
+       sin condicionar a :focus-visible (iba a fallar igual que en la barra lateral, V3d/V3d-bis:
+       un <a href="#"> puede ser focus-visible con un clic de mouse en algunos navegadores) --
+       pero esta vez Joel pidió explícitamente el anillo de teclado con :focus-visible, así que
+       va DESPUÉS del :focus sin condición: con el mouse, :focus-visible no coincide y se queda
+       sin anillo (gana la regla de arriba); con teclado, si coincide, esta de abajo gana por
+       venir después con la misma especificidad. */
+    .content-wrapper .nav-tabs .nav-link,
+    .content-wrapper .nav-pills .nav-link {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        color: #475569;
+        border: none;
+        outline: none;
+        transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+    }
+
+    .content-wrapper .nav-pills .nav-link.active {
+        background-color: #0C325C;
+        color: #fff;
+    }
+
+    .content-wrapper .nav-tabs .nav-link.active {
+        background-color: transparent;
+        color: #0C325C;
+        border: none;
+        border-bottom: 3px solid #1B9B6A;
+    }
+
+    .content-wrapper .nav-tabs .nav-link:hover:not(.active),
+    .content-wrapper .nav-pills .nav-link:hover:not(.active) {
+        background-color: rgba(27, 155, 106, .10);
+        color: #14724E;
+    }
+
+    .content-wrapper .nav-tabs .nav-link:focus,
+    .content-wrapper .nav-pills .nav-link:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .content-wrapper .nav-tabs .nav-link:focus-visible,
+    .content-wrapper .nav-pills .nav-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(27, 155, 106, .35);
+    }
+
+    /* V7, punto 2: enlaces sueltos del contenido (sin .btn) -- ej. el N.º de operación en una
+       tabla, o "Historial de consultas". Se excluyen .nav-link (pestañas, ya tienen su propio
+       estilo arriba) y .page-link (paginación, punto 7) para que esta regla más genérica nunca
+       les gane el color/subrayado por error. */
+    .content-wrapper a:not(.btn):not(.nav-link):not(.page-link) {
+        color: #0C325C;
+        font-weight: 600;
+    }
+
+    .content-wrapper a:not(.btn):not(.nav-link):not(.page-link):hover {
+        color: #1B9B6A;
+        text-decoration: underline;
+    }
+
+    /* V7, punto 3: subtítulos de sección (h2-h5) dentro de formularios/fichas -- ej. "Datos
+       personales", "Cónyuge", "Domicilio". :not(.small-box *) para que nunca toque el h3 grande
+       de los indicadores del Panel (que sí vive dentro de .content-wrapper, adentro de
+       .small-box .inner). */
+    .content-wrapper h2:not(.small-box *),
+    .content-wrapper h3:not(.small-box *),
+    .content-wrapper h4:not(.small-box *),
+    .content-wrapper h5:not(.small-box *) {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        color: #0C325C;
+        font-size: 18px;
+        margin-top: 20px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+
+    /* V7, punto 5: aire entre la barra superior y el h1 de cada pantalla -- en el contenedor,
+       no en el h1 (el h1 puede repetirse con otros márgenes propios de cada pantalla; el padding
+       acá es parejo para todas). */
+    .content-wrapper > .content > .container-fluid {
+        padding-top: 16px;
+    }
+
+    /* V7, punto 6: pie de página. */
+    .main-footer {
+        background-color: #fff;
+        border-top: 1px solid #E2E8F0;
+        color: #64748B;
+        font-size: 12px;
+        font-weight: 400;
+    }
+
+    /* V11 (piloto en clientes/lista.jsp, pedido de Joel): separador entre los filtros y la
+       barra de resultados -- línea fina arriba + aire, para que el conteo + Informe PDF/Excel
+       se lean como una sección aparte aunque sigan en el mismo fragmento que la tabla (así el
+       conteo se sigue actualizando solo con cada búsqueda en vivo, ver _resultados.jsp). Clase
+       genérica (recursos/js/listado-vivo.js es reusable en otros listados) para no repetir esto
+       si el patrón se extiende más adelante. */
+    .listado-vivo-barra-resultados {
+        padding-top: 12px;
+        margin-top: 4px;
+        border-top: 1px solid #E2E8F0;
+    }
+
+    /* V11 (corrección de Joel, reutilizable para cualquier barra de resultados): el buscador
+       "en la tabla" (si lo hay) y los botones PDF/Excel quedan siempre en una sola fila,
+       alineados a la derecha -- en pantallas chicas pueden bajar de línea (flex-wrap), pero
+       siguen alineados a la derecha (justify-content se mantiene aunque envuelvan). */
+    .barra-resultados-acciones {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .barra-resultados-buscar-tabla {
+        width: 240px;
+        flex: 0 0 auto;
+    }
+
+    /* V11: fila de "Sin coincidencias." dentro de la tabla (última del <tbody>, arriba del
+       <tfoot> si lo hay) -- la muestra/oculta recursos/js/buscar-en-tabla.js. */
+    .buscar-en-tabla-sin-coincidencias td {
+        padding: 14px;
+    }
+
+    /* V11, punto 5 (pedido de Joel): "Mostrando X de N" junto al buscador de tabla -- gris
+       13px, oculto por defecto (recursos/js/buscar-en-tabla.js lo muestra solo mientras hay
+       texto buscado). */
+    .barra-resultados-conteo-visible {
+        font-size: 13px;
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    /* V15 (pedido de Joel): aviso de que PDF/Excel exportan según los filtros del formulario,
+       no según lo que "Buscar en la tabla..." deja visible -- ámbar suave, chico, alineado a la
+       derecha, debajo de la barra de resultados. recursos/js/buscar-en-tabla.js lo muestra solo
+       mientras hay texto buscado (mismo criterio que "Mostrando X de N"). */
+    .barra-resultados-aviso-exportar-wrap {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .barra-resultados-aviso-exportar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 0 0;
+        padding: 4px 10px;
+        border-radius: 8px;
+        background-color: #FFF8E6;
+        color: #8a5a00;
+        font-size: 12px;
+    }
+
+    /* V5 (pedido de Joel): Panel -- saludo según la hora del servidor + subtítulo chico. */
+    .panel-saludo {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        color: #0C325C;
+        font-size: 20px;
+        margin-bottom: 2px;
+    }
+
+    .panel-subtitulo {
+        color: #475569;
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+
+    /* V5: subtítulo de cada bloque de tarjetas ("Hoy"/"Cartera"/"Pendientes") -- 16px explícito,
+       sin la línea inferior ni el margen del h2-h5 general (V7, punto 3): ahí Joel pidió solo
+       Montserrat 600 azul 16px, nada más. Misma especificidad que esa regla general
+       (.content-wrapper h2) más la clase propia, así gana sin necesitar !important. */
+    .content-wrapper h2.panel-bloque-titulo {
+        font-size: 16px;
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-top: 24px;
+        margin-bottom: 12px;
+    }
+
+    /* V5, punto 3: tarjeta nueva del Panel -- reemplaza las .small-box de colores fuertes.
+       Fondo blanco, radio 12px, sombra suave, borde izquierdo de 4px según el tipo (clases
+       panel-tarjeta-azul/rojo/ambar/verde/gris, de a una por tarjeta). height:100% + la fila de
+       Bootstrap ya con la misma altura por fila -- todas las tarjetas de una fila quedan de igual
+       alto aunque el texto varíe. */
+    .panel-tarjeta {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background-color: #fff;
+        border-radius: 12px;
+        border-left: 4px solid transparent;
+        box-shadow: 0 2px 10px rgba(12, 50, 92, .06);
+        padding: 16px;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .panel-tarjeta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(12, 50, 92, .12);
+    }
+
+    .panel-tarjeta-cuerpo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .panel-tarjeta-icono {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        font-size: 18px;
+    }
+
+    .panel-tarjeta-texto {
+        min-width: 0;
+    }
+
+    .panel-tarjeta-numero {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 700;
+        color: #0C325C;
+        font-size: 28px;
+        line-height: 1.15;
+        white-space: nowrap;
+    }
+
+    /* V5-bis (pedido de Joel): montos (Cartera en la calle, Cobrado esta semana/mes, Efectivo en
+       caja cuando hay caja abierta) -- tamaño adaptable (no se desborda ni pasa a dos líneas con
+       números grandes) y el sufijo "Gs." más chico y gris, pegado al número (ver
+       panel-tarjeta-numero-sufijo, el <span> lo arma panel.jsp sin tocar FormateadorNumeros). */
+    /* B127-bis/B126 (11/11/2026, revisión final): el coeficiente anterior (clamp(20px, 1.8vw,
+       28px)) estaba calibrado para montos de 8 dígitos. Con la cartera en 188.529.448 Gs. el
+       número daba scrollWidth 164 contra clientWidth 137 y el sufijo "Gs." terminaba 10 px FUERA
+       de la tarjeta. Medido en pantalla a 1280/1366/1536/1920 con 9 y con 10 dígitos: con
+       1,35vw entra en los cuatro anchos (17,3 px a 1280; 25,9 px a 1920). El máximo baja a 26 px
+       porque el de 28 solo se alcanzaba en pantallas muy anchas. */
+    .panel-tarjeta-numero-monto {
+        font-size: clamp(16px, 1.35vw, 26px);
+    }
+
+    .panel-tarjeta-numero-sufijo {
+        font-size: 60%;
+        font-weight: 600;
+        color: #475569;
+        margin-left: 2px;
+    }
+
+    /* V5-bis: "Sin caja abierta" -- texto de estado, no un número -- más chico que el resto de
+       las tarjetas y gris, en vez del tamaño/color de número grande. */
+    .panel-tarjeta-numero-texto {
+        font-size: 19px;
+        font-weight: 600;
+        color: #64748B;
+        white-space: normal;
+    }
+
+    .panel-tarjeta-descripcion {
+        color: #475569;
+        font-size: 13px;
+        margin-top: 2px;
+    }
+
+    /* El enlace hereda color/peso azul de la regla general de enlaces (V7, punto 2) -- acá solo
+       lo distinto (tamaño, separación de arriba) y el verde al pasar el mouse, sin subrayado
+       (!important porque esa regla general es más específica por sus :not() encadenados y le
+       ganaría a esta si no). V5-bis: margin-top:auto (en vez de un valor fijo) -- en la columna
+       flex de .panel-tarjeta, empuja el enlace al fondo de la tarjeta sin importar cuánto texto
+       tenga arriba, así queda alineado entre todas las tarjetas de la misma fila (que ya son de
+       igual alto, height:100%). */
+    .panel-tarjeta-enlace {
+        display: inline-block;
+        margin-top: auto;
+        padding-top: 12px;
+        font-size: 13px;
+    }
+
+    .panel-tarjeta-enlace:hover {
+        color: #1B9B6A;
+        text-decoration: none !important;
+    }
+
+    /* Colores por tipo (punto 3, pedido de Joel). Lo que queda aca es solo el borde
+       izquierdo y el icono suave de la tarjeta blanca original: desde B110 el Panel pinta
+       la tarjeta entera y el tono de cada una lo decide B110.3, al final de este archivo.
+       Las reglas de .panel-tarjeta-ambar y .panel-tarjeta-verde se borraron el 05/11/2026
+       (B110, aprobado por Joel): ninguna tarjeta lleva ya esas dos clases. */
+    .panel-tarjeta-azul {
+        border-left-color: #0C325C;
+    }
+
+    .panel-tarjeta-azul .panel-tarjeta-icono {
+        background-color: rgba(12, 50, 92, .12);
+        color: #0C325C;
+    }
+
+    .panel-tarjeta-rojo {
+        border-left-color: #DC3545;
+    }
+
+    .panel-tarjeta-rojo .panel-tarjeta-icono {
+        background-color: rgba(220, 53, 69, .12);
+        color: #DC3545;
+    }
+
+    .panel-tarjeta-gris {
+        border-left-color: #94A3B8;
+    }
+
+    .panel-tarjeta-gris .panel-tarjeta-icono {
+        background-color: rgba(148, 163, 184, .12);
+        color: #94A3B8;
+    }
+
+    .panel-tarjeta-gris .panel-tarjeta-numero {
+        color: #94A3B8;
+    }
+
+    /* Mejora de pantalla de la ficha de cobranza (pedido de Joel, 27/10/2026, diseño aprobado
+       por él): la tarjeta "Cobranza" (cobranza/ficha.jsp) pasó de tres botones gigantes
+       apilados a lo ancho a un selector compacto de una fila, con dos columnas debajo --
+       "Elegir" (lo que la cajera pide) y "Resumen del cobro" (lo que va a pasar, en forma de
+       ticket, con el botón al pie). TODO va prefijado con .cc-cobranza, una clase que existe
+       únicamente en el .card-body de esa tarjeta: ninguna de estas reglas puede alcanzar otra
+       pantalla del sistema. Colores y medidas, los de docs/GUIA_VISUAL.md -- azul #0C325C,
+       grises #F8FAFC / #E2E8F0 / #475569, radio 12px (tarjeta) y 8px (botones, ya heredado). */
+    .cc-cobranza .cc-opciones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Las tres opciones ocupan lo mismo; en pantalla chica, la que no entra baja sola al
+       renglón siguiente (12rem es el ancho donde "Por cantidad de cuotas" todavía entra). */
+    .cc-cobranza .cc-opciones .btn {
+        flex: 1 1 12rem;
+        white-space: normal;
+    }
+
+    /* La opción elegida -- la clase .active se la pone cobranza-ficha.js. Sin esta regla,
+       Bootstrap rellena .active con su azul genérico #007BFF, que no es un color del logo. */
+    .cc-cobranza .cc-opciones .btn-outline-primary.active {
+        background-color: #0C325C;
+        border-color: #0C325C;
+        color: #fff;
+    }
+
+    .cc-cobranza .cc-opcion-monto {
+        white-space: nowrap;
+    }
+
+    /* El − [N] + de la cantidad de cuotas, en una línea. */
+    .cc-cobranza .cc-contador {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .cc-cobranza .cc-contador .form-control {
+        width: 5rem;
+    }
+
+    .cc-cobranza .cc-resumen-detalle {
+        cursor: pointer;
+    }
+
+    .cc-cobranza .cc-ticket {
+        background-color: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    /* Lo que se va a cobrar: el dato más importante de la tarjeta, arriba del ticket. */
+    .cc-cobranza .cc-ticket-principal {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0C325C;
+        line-height: 1.3;
+    }
+
+    /* El "en efectivo: ..." de D-141, debajo del monto -- es una aclaración, no un segundo
+       monto que compita con el de arriba. */
+    .cc-cobranza .cc-ticket-principal small {
+        font-size: 13px;
+        font-weight: 400;
+        color: #475569;
+    }
+
+    .cc-cobranza .cc-ticket-vuelto {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+        border-top: 1px solid #E2E8F0;
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+
+    .cc-cobranza .cc-ticket-rotulo {
+        color: #475569;
+        font-weight: 600;
+    }
+
+    /* Tamaño normal, no una barra de lado a lado (pedido de Joel): el ancho mínimo es para que
+       el monto que lleva adentro ("Cobrar 232.600 Gs.") no haga saltar el botón al cambiarlo. */
+    .cc-cobranza .cc-boton-cobrar {
+        min-width: 14rem;
+    }
+
+    /* Pantalla chica: las dos columnas se apilan (Elegir arriba, Resumen abajo) por el .row de
+       Bootstrap; acá solo se les da aire entre una y otra, y en el celular el botón pasa a
+       ocupar el ancho -- es el objetivo que la cajera toca en todos los cobros (ley de Fitts). */
+    @media (max-width: 991.98px) {
+        .cc-cobranza .cc-ticket {
+            margin-top: 16px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .cc-cobranza .cc-boton-cobrar {
+            width: 100%;
+        }
+    }
+
+    /* ======================================================================
+       B110 (pedido de Joel, 05/11/2026): renovacion de la paleta -- "mas
+       contraste, menos lavado". Es la "propuesta C" que Joel aprobo mirando
+       las tres pantallas de referencia (panel, clientes, solicitudes).
+
+       Va al FINAL del archivo a proposito: repite los mismos selectores de
+       los puntos 3 (tablas), 4 (tarjetas) y V5 (panel) de mas arriba, con la
+       misma especificidad, asi gana por orden y cada regla vieja queda a la
+       vista al lado de la nueva en vez de borrada.
+
+       Sigue adentro de @media screen: lo impreso (recibo, factura, contrato,
+       pagare, los 43 informes) no cambia ni un punto por este item.
+
+       NO toca: el significado fijo de los colores (verde = exito, amarillo =
+       pendiente, rojo = error o irreversible, azul = accion principal), los
+       botones, ni el estilo de boton deshabilitado de B87 (seccion 2b).
+
+       Dos tonos de la propuesta se corrigieron por contraste (medido con la
+       formula de WCAG 2.1, texto blanco sobre el extremo CLARO del degradado,
+       que es el peor caso): el ambar #D97706 daba 3,19:1 y el verde #1B9B6A
+       daba 3,53:1, los dos por debajo del 4,5:1 que pide AA para texto normal
+       (la descripcion de la tarjeta son 13px). Se bajo un escalon cada
+       degradado conservando el salto de color: ambar #92400E -> #B45309
+       (7,09:1 y 5,02:1) y verde #0F5C3F -> #167F57 (8,01:1 y 4,99:1). El
+       resto de la propuesta pasa sin cambios.
+       ====================================================================== */
+
+    /* B110.1 Fondo del area de contenido: un gris-azulado algo mas marcado que
+       el #f4f6f9 de AdminLTE, para que las tarjetas y tablas blancas se
+       despeguen del fondo en vez de fundirse con el. */
+    .content-wrapper {
+        background-color: #EEF3F8;
+    }
+
+    /* B110.2 Barra superior: pasa de blanca a azul de marca, con la franja
+       verde abajo que la separa del contenido. El !important es unicamente
+       para estas dos declaraciones y no es opcional: la regla V4 del <style>
+       de cabecera.jsp ya las declara !important (background-color:#fff y
+       border-bottom:none), y un !important solo lo pisa otro !important, por
+       mas que este archivo se cargue despues.
+
+       OJO -- aca NO va ningun selector universal (".main-header *" o
+       ".navbar *"): el menu desplegable del usuario cuelga de esta misma
+       barra y sigue siendo blanco con texto oscuro, asi que pintarle todo de
+       blanco lo dejaria con letra blanca sobre fondo blanco. Por eso se
+       nombra elemento por elemento, y el bloque .dropdown-menu de V4 queda
+       intacto. */
+    .main-header.navbar {
+        background-color: #0C325C !important;
+        border-bottom: 3px solid #1B9B6A !important;
+        box-shadow: 0 2px 8px rgba(12, 50, 92, .18);
+    }
+
+    /* Bootstrap pinta los enlaces de la barra con
+       .navbar-light .navbar-nav .nav-link{color:rgba(0,0,0,.5)} -- tres
+       clases. Por eso aca se usan tambien tres (.main-header.navbar es una
+       sola unidad, mas .navbar-nav, mas .nav-link): empatan, y gana esta por
+       orden. Alcanza tambien al triangulito del desplegable, que se dibuja
+       con currentColor. */
+    .main-header.navbar .navbar-nav .nav-link {
+        color: #fff;
+    }
+
+    .main-header .nav-link[data-widget="pushmenu"] {
+        color: #fff;
+    }
+
+    .main-header .nav-link[data-widget="pushmenu"]:hover {
+        background-color: rgba(255, 255, 255, .14);
+        color: #fff;
+    }
+
+    .main-header .navbar-fecha-hoy {
+        color: #D7E2EE;
+    }
+
+    /* B110.3 Tarjetas del Panel ("opcion F", aprobada por Joel el 05/11/2026):
+       de fondo blanco con una barrita de color a la izquierda, a color pleno
+       con texto blanco, cada tarjeta con su propio tono joya.
+
+       EL COLOR LO DECIDE LA TARJETA, NO SU POSICION. La maqueta de Joel
+       asignaba el tono con selectores de posicion (.row:nth-of-type /
+       :nth-child) y eso solo sirve para una foto: el Panel arma filas
+       distintas para cada perfil (el oficial no ve la caja, la cajera no ve
+       "Cartera en la calle", etc.), asi que la misma casilla le toca a
+       tarjetas distintas y el color cambiaria de significado segun quien
+       entre. Aca cada tarjeta lleva su clase propia en panel.jsp y el tono
+       viaja con ella.
+
+       Tonos por tarjeta (y el bloque donde conviven):
+         HOY        Cobros de hoy ................ azul
+                    Vencen hoy ................... cian
+                    Promesas de hoy .............. violeta
+                    Efectivo en caja ............. frambuesa (gris si no hay caja)
+                    Pendientes de aprobar ........ indigo   (solo gerente)
+                    Aprobadas para formalizar .... indigo   (solo oficial)
+         CARTERA    Prestamos en mora ............ ROJO (y nada mas usa rojo)
+                    Cartera en la calle .......... petroleo
+                    Cobrado esta semana .......... indigo
+                    Cobrado este mes ............. esmeralda
+         PENDIENTES Pendientes de desembolso ..... azul acero
+                    Diferencias de caja .......... frambuesa (es plata de caja)
+                    Reversiones por autorizar .... ciruela
+                    Mis solicitudes en curso ..... azul acero (solo oficial)
+                    Pagares por devolver ......... ciruela    (solo oficial)
+
+       "Pendientes de aprobar" y "Aprobadas para formalizar" comparten indigo
+       porque NUNCA se ven juntas (una es solo del gerente y la otra solo del
+       oficial); lo mismo las dos parejas de PENDIENTES. Dentro de un mismo
+       bloque no hay dos tarjetas del mismo tono para ningun perfil.
+
+       El ROJO queda reservado para la mora, como pidio Joel, y se oscurecio
+       su extremo claro (#DC2626 -> #B91C1C) para que no se confunda con la
+       frambuesa de la caja: son familias distintas (ladrillo vs. magenta).
+
+       Contraste: el blanco se mide siempre contra el extremo CLARO del
+       degradado (el degradado es de 135 grados: oscuro arriba a la izquierda,
+       claro abajo a la derecha), y ademas contra ese mismo extremo YA
+       ACLARADO por el brightness(1.08) del hover, que es el peor caso real.
+       Por eso dos tonos de la maqueta se bajaron un escalon: esmeralda
+       #15803D -> #157A3A (en hover daba 4,42:1) y gris #64748B -> #5B687C (en
+       hover daba 4,19:1). A ojo son el mismo color; medidos, pasan. */
+    .panel-tarjeta {
+        border-left: none;
+        color: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 16px rgba(12, 50, 92, .18);
+    }
+
+    .panel-tarjeta-numero,
+    .panel-tarjeta-numero-sufijo,
+    .panel-tarjeta-numero-texto,
+    .panel-tarjeta-descripcion {
+        color: #fff;
+    }
+
+    /* El enlace del pie de la tarjeta necesita esta cadena de :not() y no un
+       !important: la regla general de enlaces de V7
+       (.content-wrapper a:not(.btn):not(.nav-link):not(.page-link), cuatro
+       clases mas el elemento) le gana a cualquier selector corto, asi que se
+       le agrega la clase propia a esa misma forma para empatarla y pasarla.
+       El :hover verde de V5 tambien se anula: sobre una tarjeta de color no
+       se veria. */
+    .content-wrapper a.panel-tarjeta-enlace:not(.btn):not(.nav-link):not(.page-link),
+    .content-wrapper a.panel-tarjeta-enlace:not(.btn):not(.nav-link):not(.page-link):hover {
+        color: #fff;
+    }
+
+    .panel-tarjeta-azul {
+        background: linear-gradient(135deg, #0C325C, #1D4E89);
+    }
+
+    .panel-tarjeta-cian {
+        background: linear-gradient(135deg, #155E75, #0E7490);
+    }
+
+    .panel-tarjeta-violeta {
+        background: linear-gradient(135deg, #5B21B6, #7C3AED);
+    }
+
+    .panel-tarjeta-frambuesa {
+        background: linear-gradient(135deg, #9D174D, #BE185D);
+    }
+
+    .panel-tarjeta-indigo {
+        background: linear-gradient(135deg, #3730A3, #4338CA);
+    }
+
+    .panel-tarjeta-petroleo {
+        background: linear-gradient(135deg, #134E4A, #0F766E);
+    }
+
+    /* Esmeralda corregida por contraste en hover (ver la nota de arriba). */
+    .panel-tarjeta-esmeralda {
+        background: linear-gradient(135deg, #0F5C3F, #157A3A);
+    }
+
+    .panel-tarjeta-azulacero {
+        background: linear-gradient(135deg, #075985, #0369A1);
+    }
+
+    .panel-tarjeta-ciruela {
+        background: linear-gradient(135deg, #701A75, #A21CAF);
+    }
+
+    /* Rojo: SOLO la mora. */
+    .panel-tarjeta-rojo {
+        background: linear-gradient(135deg, #991B1B, #B91C1C);
+    }
+
+    /* Gris corregido por contraste en hover (ver la nota de arriba). */
+    .panel-tarjeta-gris {
+        background: linear-gradient(135deg, #475569, #5B687C);
+    }
+
+    .panel-tarjeta-azul .panel-tarjeta-icono,
+    .panel-tarjeta-cian .panel-tarjeta-icono,
+    .panel-tarjeta-violeta .panel-tarjeta-icono,
+    .panel-tarjeta-frambuesa .panel-tarjeta-icono,
+    .panel-tarjeta-indigo .panel-tarjeta-icono,
+    .panel-tarjeta-petroleo .panel-tarjeta-icono,
+    .panel-tarjeta-esmeralda .panel-tarjeta-icono,
+    .panel-tarjeta-azulacero .panel-tarjeta-icono,
+    .panel-tarjeta-ciruela .panel-tarjeta-icono,
+    .panel-tarjeta-rojo .panel-tarjeta-icono,
+    .panel-tarjeta-gris .panel-tarjeta-icono {
+        background-color: rgba(255, 255, 255, .20);
+        color: #fff;
+    }
+
+    /* El numero de la tarjeta gris estaba en gris claro (V5) -- sobre el gris
+       pleno de ahora tiene que ser blanco como el de las demas. */
+    .panel-tarjeta-gris .panel-tarjeta-numero {
+        color: #fff;
+    }
+
+    /* B110.3b Efecto al pasar el mouse (aprobado por Joel el 05/11/2026): la
+       tarjeta se levanta y crece apenas, con mas sombra y un toque de brillo;
+       el icono crece y gira un poco; la flecha de "Ir a ..." se corre hacia la
+       derecha. Las filas de tabla y los recuadros acompanan con una transicion
+       suave.
+
+       NO se aplica cursor:pointer a la tarjeta, aunque la maqueta lo traia:
+       la tarjeta entera no es cliqueable (lo cliqueable es el enlace "Ir a
+       ..." del pie) y varias tarjetas no tienen enlace ninguno -- una manito
+       sobre algo que no responde al clic es la pantalla prometiendo algo que
+       no cumple. El movimiento ya avisa que la tarjeta esta viva. Si Joel lo
+       quiere igual, es una linea.
+
+       El brightness del hover entra en la cuenta del contraste: aclara el
+       fondo y empeora el blanco, por eso los tonos estan medidos en hover y
+       no solo en reposo (ver la nota de B110.3). */
+    .panel-tarjeta {
+        transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    }
+
+    .panel-tarjeta:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 14px 28px rgba(12, 50, 92, .28);
+        filter: brightness(1.08);
+    }
+
+    .panel-tarjeta-icono {
+        transition: transform .25s ease;
+    }
+
+    .panel-tarjeta:hover .panel-tarjeta-icono {
+        transform: scale(1.15) rotate(-6deg);
+    }
+
+    .panel-tarjeta-enlace i {
+        transition: transform .2s ease;
+    }
+
+    .panel-tarjeta:hover .panel-tarjeta-enlace i {
+        transform: translateX(4px);
+    }
+
+    .table tbody tr {
+        transition: background-color .15s ease;
+    }
+
+    .card:not(.small-box) {
+        transition: box-shadow .2s ease;
+    }
+
+    .card:not(.small-box):hover {
+        box-shadow: 0 8px 20px rgba(12, 50, 92, .14);
+    }
+
+    /* Quien pidio menos movimiento en su sistema operativo no recibe ninguno:
+       se apagan las transiciones y los desplazamientos. La sombra y el brillo
+       se mantienen -- son cambios de color, no de movimiento. */
+    @media (prefers-reduced-motion: reduce) {
+
+        .panel-tarjeta,
+        .panel-tarjeta-icono,
+        .panel-tarjeta-enlace i,
+        .table tbody tr,
+        .card:not(.small-box) {
+            transition: none;
+        }
+
+        .panel-tarjeta:hover,
+        .panel-tarjeta:hover .panel-tarjeta-icono,
+        .panel-tarjeta:hover .panel-tarjeta-enlace i {
+            transform: none;
+        }
+    }
+
+    /* B110.4 Titulos: el azul mas oscuro de la guia (#0A2A4E) sobre el fondo
+       nuevo, y el subtitulo de cada bloque del panel con su barrita verde. */
+    .content-wrapper h1,
+    .content-header h1 {
+        color: #0A2A4E;
+    }
+
+    .panel-saludo {
+        color: #0A2A4E;
+    }
+
+    .content-wrapper h2.panel-bloque-titulo {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0C325C;
+        border-left: 5px solid #1B9B6A;
+        padding-left: 10px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    /* B110.5 Recuadros: borde propio y franja verde arriba, en vez de la
+       tarjeta sin borde que se fundia con el fondo. El radio baja de 12 a
+       10px, y el del encabezado lo acompana para que no sobresalga. */
+    .card:not(.small-box) {
+        border: 1px solid #C3D0DD;
+        border-top: 4px solid #1B9B6A;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(12, 50, 92, .10);
+    }
+
+    .card:not(.small-box) > .card-header {
+        background-color: #E9F5EF;
+        border-bottom: 1px solid #C9E6D7;
+        border-radius: 10px 10px 0 0;
+        color: #0C325C;
+        font-weight: 600;
+    }
+
+    /* B110.6 Tablas: encabezado azul marino con texto blanco (12,91:1), borde
+       propio, esquinas redondeadas, cebra y fila resaltada en verde suave al
+       pasar el mouse. border-collapse:separate es lo que permite el
+       border-radius + overflow:hidden; con el "collapse" de Bootstrap las
+       esquinas quedan cuadradas. */
+    .table {
+        background-color: #fff;
+        border: 1px solid #B9C7D6;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background-color: #0C325C;
+        color: #fff;
+        border-color: #0C325C;
+        border-bottom: 3px solid #1B9B6A;
+    }
+
+    .table td,
+    .table th {
+        border-top: 1px solid #D5DEE8;
+        border-right: 1px solid #E1E8F0;
+    }
+
+    /* La cebra pasa a ir en TODAS las tablas, no solo en las .table-striped
+       (asi se aprobo en las capturas de referencia). */
+    .table tbody tr:nth-of-type(odd) {
+        background-color: #F2F6FB;
+    }
+
+    /* Tiene que quedar DESPUES de la cebra: los dos selectores pesan igual, y
+       si el hover fuera antes, la fila impar se quedaria con su fondo propio
+       al pasar el mouse. */
+    .table-hover tbody tr:hover {
+        background-color: #E3F4EC;
+    }
+
+    /* 8. B4/B43 (B86, tramo transversal, 05/11/2026): cartel de confirmacion que RESUME que va a
+       pasar -- cliente, monto, plazo, cuota, que se emite. La clase la pone plantilla/pie.jsp y
+       SOLO cuando el mensaje trae saltos de linea, asi que ningun otro cartel del sistema la ve.
+       Hace falta porque SweetAlert2 pinta el mensaje con textContent y su contenedor viene con
+       white-space normal: sin pre-line los renglones se colapsan en un parrafo. A la izquierda
+       porque una lista de datos centrada se lee peor; el resto de los carteles (una sola linea)
+       sigue centrado. Le gana a .swal2-html-container (0,1,0) por especificidad (0,2,0), asi que
+       no depende del orden de carga ni necesita !important -- la libreria inyecta su CSS desde el
+       .js, despues de este archivo. */
+    .swal2-html-container.cartel-resumen {
+        white-space: pre-line;
+        text-align: left;
+    }
+
+    /* ======================================================================
+       9. B143 (pedido de Joel, 11/11/2026): Cotizador en dos columnas.
+       TODO va prefijado con .cc-cotizador, una clase que existe únicamente en
+       la fila de cotizador/formulario.jsp -- ninguna de estas reglas puede
+       alcanzar otra pantalla, igual que .cc-cobranza. Mismo lenguaje visual que
+       la tarjeta del Panel (V5, punto 3): fondo claro, radio 12px, Montserrat
+       700 en azul de marca, descripción 13px gris -- pero clases propias y SIN
+       su hover ni sus tonos joya, que pertenecen al Panel (B110: el color viaja
+       con la clase). Ningún color nuevo: todos salen de GUIA_VISUAL.md §1.1.
+       ====================================================================== */
+
+    /* Las tres cifras que el interesado pregunta primero. El principal se
+       distingue por TAMAÑO y por la barrita azul de marca, nunca por verde o
+       ámbar: una cotización no está confirmada ni es una advertencia. */
+    .cc-cotizador .cc-cotizador-cifras {
+        margin-bottom: 4px;
+    }
+
+    .cc-cotizador .cc-cotizador-cifra {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background-color: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-left: 4px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .cc-cotizador .cc-cotizador-cifra-principal {
+        border-left-color: #0C325C;
+    }
+
+    .cc-cotizador .cc-cotizador-cifra-rotulo {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    /* Tamaño adaptable, medido en pantalla con el peor dato posible y no
+       estimado (B126): el tope del cotizador es 15.000.000 Gs. (parámetro
+       credito.monto_maximo), o sea una cuota de hasta 1.000.000 Gs. a 3 meses y
+       un total de hasta 20.566.900 Gs. a 24 meses.
+
+       Lo que costó encontrar: el peor ancho NO es el más chico. Barrido de
+       992 a 1440 px de a 32, con esos dos montos puestos en el elemento, la caja
+       del número mide 83 px a 992, BAJA a 77 px a 1024 y recién vuelve a crecer
+       desde ahí (a 992 la barra lateral de AdminLTE se colapsa y le devuelve el
+       ancho al contenido). A 1024 el número necesitaría 10,2 px de letra para
+       entrar: es el piso de B128 -- tres cifras al lado no entran ahí a ningún
+       tamaño legible, y el problema deja de ser de estilo. Por eso las tres van
+       en fila recién desde 1200 px (col-xl-4) y debajo se apilan a lo ancho de
+       la columna. Con eso, el peor ancho real pasa a ser 1200 px: ahí la caja
+       mide 111 px.
+
+       El tope se midió con el ancho NATURAL del texto (un clon con
+       width:max-content, buscando el px más grande que entra), no con
+       scrollWidth contra clientWidth: el span es de bloque y llena la caja, así
+       que scrollWidth == clientWidth siempre que entre y esa comparación avisa
+       del desborde pero no dice cuánto margen queda. Máximos medidos de 1200 a
+       1440: 1,375vw el número normal y 1,542vw el principal; se dejan 1,3vw y
+       1,45vw, un 5 % por debajo. Los pisos (15 y 17 px) solo actúan por debajo
+       de 1200 px, donde la tarjeta ocupa todo el ancho de la columna. */
+    .cc-cotizador .cc-cotizador-cifra-numero {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 700;
+        color: #0C325C;
+        font-size: clamp(15px, 1.3vw, 21px);
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .cc-cotizador .cc-cotizador-cifra-principal .cc-cotizador-cifra-numero {
+        font-size: clamp(17px, 1.45vw, 24px);
+    }
+
+    /* El " Gs." más chico y gris, pegado al número -- mismo criterio y mismas
+       medidas que .panel-tarjeta-numero-sufijo (V5-bis). El <span> lo arma la
+       JSP, sin tocar FormateadorNumeros. */
+    .cc-cotizador .cc-cotizador-cifra-sufijo {
+        font-size: 60%;
+        font-weight: 600;
+        color: #475569;
+        margin-left: 2px;
+    }
+
+    /* El monto en letras (REGLAS_DESARROLLO.md §5: todo importe principal lo
+       lleva debajo) y la nota del IVA. Envuelven: por eso las tres tarjetas se
+       igualan con height:100% y no con un alto fijo. */
+    .cc-cotizador .cc-cotizador-cifra-pie {
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.35;
+        margin-top: 4px;
+    }
+
+    /* Un monto no se parte en dos renglones. A 1280 las dos tablas del resultado
+       entran enteras en la columna (el plan pide 516 px de 589 con el peor caso,
+       ver .tabla-informe-ancha); entre 1100 y 1160 px no, y ahí el nowrap las
+       hace desbordar su .table-responsive, que ya tiene scroll propio -- una
+       tabla ancha con su barra es lo esperable (B128 aceptó 41 px de arrastre en
+       el informe de Cobros); "316.958" partido en dos renglones, no. */
+    .cc-cotizador .table-responsive th,
+    .cc-cotizador .table-responsive td {
+        white-space: nowrap;
+    }
+
+    /* Las tres tasas, una al lado de la otra, cada una con su TEXTO CORTO debajo
+       (RF01-E: el corto va siempre visible junto al dato). En pantalla angosta
+       bajan solas por el .row de Bootstrap.
+       El separador "·" que tuvo la primera version de B143 ya no existe: al
+       pasar a tres columnas dejo de haber nada que separar, y una regla que no
+       matchea nada es documentacion que miente (mismo criterio que B110 con
+       .panel-tarjeta-ambar). Habia quedado en #64748B porque en #B9C7D6 medía
+       1,72:1 -- el dato se conserva acá por si alguna vez vuelve. */
+    .cc-cotizador .cc-cotizador-tasas {
+        margin-bottom: 4px;
+    }
+
+    .cc-cotizador .cc-cotizador-tasa {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 12px;
+    }
+
+    .cc-cotizador .cc-cotizador-tasa-dato {
+        color: #0C325C;
+        font-size: 15px;
+    }
+
+    .cc-cotizador .cc-cotizador-tasa-sigla {
+        font-weight: 700;
+    }
+
+    .cc-cotizador .cc-cotizador-tasa-corto {
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.35;
+        margin-top: 2px;
+    }
+
+    /* El formulario queda a mano mientras se recorre el resultado (pedido de Joel
+       al probar B143 en pantalla). Dos cosas distintas:
+       - NO lleva h-100. Con el plan desplegado, estirarlo hasta el alto del
+         resultado dejaba debajo del botón "Cotizar" un rectángulo blanco enorme.
+       - position: sticky de 992 px para arriba, que es donde existen las dos
+         columnas (col-lg-*); apiladas, pegarlo arriba taparía el resultado.
+       El 80 px de arriba es el mismo que cabecera.jsp ya usa en su
+       scroll-margin-top para que la barra superior fija no tape el destino: un
+       solo número para el mismo problema, no dos. Funciona porque la columna de
+       Bootstrap se estira sola al alto de la fila (align-items: stretch), así
+       que la tarjeta tiene por dónde correrse. */
+    @media (min-width: 992px) {
+        .cc-cotizador .cc-cotizador-formulario {
+            position: sticky;
+            top: 80px;
+        }
+    }
+
+    /* Los dos botones de la cotización, en su propio renglón y separados del
+       botón que despliega el plan (que pertenece a la sección de arriba). */
+    .cc-cotizador .cc-cotizador-acciones {
+        margin-top: 16px;
+    }
+
+    /* La flecha del botón del plan de pagos sigue al estado real del control
+       (aria-expanded), no a una clase que el JavaScript tenga que acordarse de
+       poner: si el estado y el dibujo salen del mismo atributo, no pueden
+       quedar diciendo cosas distintas. */
+    .cc-cotizador .cc-cotizador-ver-plan .fa-chevron-down {
+        transition: transform .15s ease;
+    }
+
+    .cc-cotizador .cc-cotizador-ver-plan[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .cc-cotizador .cc-cotizador-ver-plan .fa-chevron-down {
+            transition: none;
+        }
+    }
+
+    /* Sin cotización, la columna de la derecha dice qué va a aparecer ahí. El
+       .card-body ya crece por el flex de Bootstrap (.card-body{flex:1 1 auto})
+       dentro de la tarjeta con h-100, así que el height:100% lo centra vertical
+       contra la altura del formulario. */
+    .cc-cotizador .cc-cotizador-vacio {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        height: 100%;
+        padding: 32px 16px;
+    }
+
+    .cc-cotizador .cc-cotizador-vacio-icono {
+        font-size: 40px;
+        color: #C3D0DD;
+        margin-bottom: 12px;
+    }
+
+    .cc-cotizador .cc-cotizador-vacio-titulo {
+        font-family: 'Montserrat', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+            'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-weight: 600;
+        color: #0C325C;
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .cc-cotizador .cc-cotizador-vacio-detalle {
+        color: #475569;
+        font-size: 13px;
+        margin-bottom: 0;
+    }
+
+    /* ======================================================================
+       10. B152 (revisión UX de Clientes, 14/11/2026): la barra de acciones del
+       alta/edición de cliente queda a la vista mientras se recorre el
+       formulario largo (44 campos, 25 obligatorios, una sola columna).
+       TODO va prefijado con .cc-ficha-acciones, clase que existe únicamente en
+       clientes/ficha.jsp -- ninguna de estas reglas puede alcanzar otra
+       pantalla, igual que .cc-cotizador y .cc-cobranza.
+       Mismo mecanismo que el §9 del Cotizador (position: sticky) y, como ahí,
+       SIN movimiento nuevo: no hay transición ni desplazamiento que haya que
+       apagar con prefers-reduced-motion. Ningún color nuevo: el blanco es el de
+       la tarjeta que ya la contiene y el gris del borde es el #E2E8F0 de
+       GUIA_VISUAL.md §1.
+       ====================================================================== */
+
+    .cc-ficha-acciones {
+        position: sticky;
+        bottom: 0;
+        /* Por encima de los campos del formulario y muy por debajo de los
+           carteles de SweetAlert2 (1060): la barra nunca puede taparle un
+           cartel de confirmación. */
+        z-index: 2;
+        background-color: #FFFFFF;
+        border-top: 1px solid #E2E8F0;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        margin-top: 8px;
+    }
+
+    /* "Faltan N datos obligatorios" es un PEDIDO, no un error: va en gris, no
+       en rojo (B95 -- el rojo es para lo que el usuario ya escribió mal, y con
+       el campo todavía vacío no hay nada mal escrito). #475569 sobre blanco da
+       7,4:1, bastante arriba del 4,5:1 que pide el texto. */
+    .cc-ficha-acciones .cc-ficha-faltantes {
+        color: #475569;
+        font-size: 13px;
+    }
+
+    /* ======================================================================
+       11. B156 (revisión UX de Clientes, 14/11/2026): el botón "Más filtros"
+       del listado de clientes. Solo la flecha -- el botón es un
+       btn-outline-secondary de siempre.
+       La flecha sigue el estado REAL del control (aria-expanded, que mantiene
+       Bootstrap), no una clase que el JavaScript tenga que acordarse de poner:
+       mismo criterio que .cc-cotizador-ver-plan del §9, así el dibujo y el
+       estado no pueden quedar diciendo cosas distintas.
+       ====================================================================== */
+
+    .cc-filtros-toggle .fa-chevron-down {
+        transition: transform .15s ease;
+    }
+
+    .cc-filtros-toggle[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+
+    /* El giro es movimiento, así que se apaga donde el sistema operativo lo
+       pide (GUIA_VISUAL.md: todo movimiento nuevo lleva su regla). La flecha
+       sigue cambiando de sentido, pero sin transición. */
+    @media (prefers-reduced-motion: reduce) {
+        .cc-filtros-toggle .fa-chevron-down {
+            transition: none;
+        }
+    }
+
+    /* ======================================================================
+       12. B157 (revisión UX de Clientes, 14/11/2026): los encabezados que
+       ordenan el listado de clientes.
+       Esto NO es decoración: sin esta regla el enlace sale INVISIBLE. El
+       encabezado de tabla es azul de marca con texto blanco (§7b, B110) y
+       .content-wrapper a:not(.btn):not(.nav-link):not(.page-link) pinta todo
+       enlace del contenido en ese MISMO azul -- o sea azul sobre azul. Se
+       repite la forma de B110: se le agrega la clase propia al selector largo
+       que ya existe, en vez de pelear con !important.
+       ====================================================================== */
+
+    .content-wrapper .table thead th a.cc-orden-columna:not(.btn):not(.nav-link):not(.page-link),
+    .content-wrapper .table thead th a.cc-orden-columna:not(.btn):not(.nav-link):not(.page-link):hover {
+        color: #fff;
+    }
+
+    /* El subrayado en hover/foco es la única señal de que el encabezado es
+       clickeable (el color no puede cambiar: ya es blanco sobre azul). */
+    .content-wrapper .table thead th a.cc-orden-columna:hover,
+    .content-wrapper .table thead th a.cc-orden-columna:focus-visible {
+        text-decoration: underline;
+    }
+
+    /* La flecha, más tenue que el rótulo: la columna ordenada se reconoce por
+       el ícono lleno (fa-sort-up / fa-sort-down), no por el peso del texto. */
+    .cc-orden-columna .fa-sort {
+        opacity: .55;
+    }
+
+    /* Ajuste del 14/11/2026, probándolo en pantalla: las flechitas ensanchan el
+       <thead> y aprietan la tabla, así que "Estado" se separaba de su flecha y
+       "Ver / editar" se partía en dos renglones. Ni el rótulo con su flecha ni
+       los botones de la fila se parten; si la tabla no entra, la que resuelve es
+       la barra horizontal de .table-responsive, que esa tabla ya tiene. */
+    .cc-orden-columna,
+    .cc-celda-acciones {
+        white-space: nowrap;
+    }
+
+    /* ======================================================================
+       13. Celdas que no se parten (14/11/2026, probando B174 en pantalla).
+       La clase genérica para las columnas cuyo contenido es una sola unidad y
+       se lee mal cortada: un plazo ("12 meses"), una espera ("2 días"), un
+       porcentaje ("154,6 %"), un monto con su "Gs." o el nombre de una
+       persona. NO va en las columnas de texto largo -- "Cliente", que trae
+       nombre y C.I., tiene que poder bajar de renglón.
+       Si la tabla no entra, la que resuelve es la barra horizontal de
+       .table-responsive, que esas tablas ya tienen; nunca bajar la letra para
+       que entre (el piso de B128).
+       ====================================================================== */
+
+    .cc-sin-partir {
+        white-space: nowrap;
+    }
+
+    /* ======================================================================
+       14. La columna del nombre, con un ancho mínimo (14/11/2026, probando
+       B175 en pantalla).
+       Es la contracara de §13: cuando una tabla tiene muchas columnas que no
+       se parten (el Historial de Aprobaciones quedó con 9), el navegador le
+       deja a la columna de texto libre lo que sobra, y el nombre del cliente
+       se partía en 4-5 renglones. Esta clase le reserva un ancho mínimo para
+       que el nombre entre en uno o dos, SIN quitarle la posibilidad de bajar
+       de renglón (eso es lo que no se puede hacer en esa columna).
+       En rem a propósito: acompaña el tamaño de letra del usuario (RNF de
+       accesibilidad), a diferencia de un ancho en píxeles.
+       Si con eso la tabla no entra, la que resuelve sigue siendo la barra
+       horizontal de .table-responsive; nunca bajar la letra (el piso de B128).
+       ====================================================================== */
+
+    .cc-celda-nombre {
+        min-width: 15rem;
+    }
+
+    /* ======================================================================
+       15. B185 (revisión UX de Formalización, 15/11/2026): la barra de acciones
+       de la ficha del préstamo queda a la vista mientras se recorre una ficha
+       larga (condiciones, documentos generados, checklist, plan de 12-24
+       cuotas, regenerar, anular).
+       Es el §10 de B152 con otra clase: el mismo mecanismo (position: sticky),
+       los mismos valores y el mismo motivo. Dos clases y no una compartida
+       porque cada una existe en UNA pantalla y así ninguna puede alcanzar a la
+       otra (mismo criterio que .cc-cotizador y .cc-cobranza); si alguna vez
+       aparece una tercera, ahí sí conviene unificarlas.
+       Sin movimiento nuevo: no hay transición que apagar con
+       prefers-reduced-motion. Ningún color nuevo: el blanco del fondo y el
+       #E2E8F0 del borde son los de GUIA_VISUAL.md §1.
+       ====================================================================== */
+
+    .cc-ficha-formalizacion-acciones {
+        position: sticky;
+        bottom: 0;
+        /* Por encima del contenido y muy por debajo de SweetAlert2 (1060) y del
+           modal de Bootstrap (1050): la barra nunca puede taparle al gerente el
+           cartel de anular. */
+        z-index: 2;
+        background-color: #FFFFFF;
+        border-top: 1px solid #E2E8F0;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        margin-top: 8px;
+    }
+
+    /* "Falta para desembolsar: ..." es un PEDIDO, no un error: gris, no rojo
+       (B95). #475569 sobre blanco da 7,4:1, bastante arriba del 4,5:1 que pide
+       el texto. */
+    .cc-ficha-formalizacion-acciones .cc-ficha-formalizacion-falta {
+        color: #475569;
+        font-size: 13px;
+    }
+
+    /* B220-bis (pedido de Joel, 15/11/2026): la fila de DETALLE de una tabla -- el formulario que
+       se despliega debajo de su fila (hoy, el "Cambiar" de cada parametro). Se oculta por CSS y
+       NUNCA se saca del HTML: esos formularios llevan el token CSRF y pruebas/humo_http.sh lo lee
+       del GET /parametros para sus cuatro POST a /parametros/actualizar-valor.
+       La clase la pone recursos/js/buscar-en-tabla.js, que abre una a la vez. El "d-none" de
+       Bootstrap es display:none!important, asi que si el filtro de grupo esconde la fila, el
+       detalle queda escondido igual aunque estuviera abierto -- un solo dueño por clase: el
+       script pone "d-none" (visibilidad por filtro) y "…-abierta" (despliegue), y no se pisan. */
+    tr.buscar-en-tabla-detalle {
+        display: none;
+    }
+
+    tr.buscar-en-tabla-detalle.buscar-en-tabla-detalle-abierta {
+        display: table-row;
+    }
+
+    tr.buscar-en-tabla-detalle > td {
+        background-color: #F8F9FA;
+        border-top: none;
+    }
+
+    /* B220-bis, segunda vuelta (prueba de Joel, 15/11/2026): las NUEVE pildoras de /parametros no
+       entraban en un renglon y "Archivos" bajaba sola. Esta es la variante de esa pantalla: el
+       estilo de cada pildora sigue siendo el del indice de /reportes (indice-reportes.css, una
+       sola definicion), aca solo se aprieta un poco el tamano -- el indice NO se toca.
+
+       Dos clases en el selector del contenedor a proposito: administracion.jsp carga
+       indice-reportes.css DESPUES de este archivo, asi que con una sola clase
+       (.parametros-grupos) la regla de .indice-reportes-categorias le ganaria por orden de
+       carga. Con dos, gana por especificidad y no hace falta ningun !important (B109).
+
+       Y el contenedor pasa a flex con gap: en una pantalla angosta las pildoras bajan parejas,
+       con la misma separacion vertical y horizontal, en vez de depender de los margenes. */
+    .indice-reportes-categorias.parametros-grupos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 14px;
+    }
+
+    .parametros-grupos .indice-reportes-categoria-boton {
+        margin: 0;
+        padding: 5px 11px;
+        font-size: 12.5px;
+    }
+
+    /* B234 (pedido de Joel, 16/11/2026): la fila de accesos rapidos del panel -- lo que ARRANCA el
+       circuito (Cotizador, Nuevo cliente), que las 14 tarjetas no cubren porque todas son trabajo
+       en curso. Quien los ve lo decide la JSP preguntandole a ServicioAutorizacion. */
+    .panel-accesos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 18px;
+    }
+
+    /* B235 (pedido de Joel, 16/11/2026): TODA la tarjeta del panel se puede clickear, no solo el
+       renglon de abajo -- que era el objetivo mas chico de una tarjeta de cuatro lineas.
+
+       Se hace SIN TOCAR panel.jsp: el enlace que cada tarjeta ya tiene (.panel-tarjeta-enlace) se
+       estira sobre su tarjeta con un ::after posicionado. Tres cosas se ganan con eso:
+         - el teclado sigue funcionando solo, porque el que recibe el foco es el mismo <a> de
+           siempre (no hay ningun div con onclick, que seria inalcanzable con Tab);
+         - las tarjetas SIN enlace --las que ese perfil no puede accionar-- no se vuelven
+           clickeables, porque no hay ::after que estirar; y
+         - no se agrega ni se mueve una sola linea del archivo que lee el proyecto hermano.
+
+       El "inset: 0" va con las cuatro propiedades sueltas delante, para un navegador viejo que no
+       lo entienda; y el cursor de mano se limita a las tarjetas que TIENEN enlace con :has()
+       --verificado en el navegador de esta maquina, Chrome 157, que lo soporta--: si un navegador
+       no soportara :has(), lo unico que se pierde es el cursor, nunca el clic. */
+    .panel-tarjeta {
+        position: relative;
+    }
+
+    .panel-tarjeta-enlace::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        inset: 0;
+        z-index: 1;
+        border-radius: 14px;
+    }
+
+    .panel-tarjeta:has(.panel-tarjeta-enlace) {
+        cursor: pointer;
+    }
+
+    /* El foco del teclado se dibuja sobre la TARJETA, no sobre el renglon del enlace: ahora el
+       area clickeable es la tarjeta entera, asi que el recuadro de foco tiene que coincidir con lo
+       que se va a activar con Enter. Sin esto, el usuario de teclado veria el foco en una linea de
+       13 px y activaria una tarjeta de 120. */
+    .panel-tarjeta:focus-within {
+        outline: 3px solid #0C325C;
+        outline-offset: 3px;
+    }
+
+    .panel-tarjeta-enlace:focus {
+        outline: none;
+    }
+
+    /* ======================================================================
+       16. B160 (16/11/2026, decision de Joel): la columna de cifras va a la
+       derecha, con su encabezado y su total.
+       El criterio, textual: "columna de cifras en una tabla -> a la derecha,
+       con su encabezado (th) y su total (tfoot). Un monto suelto al lado de su
+       etiqueta (par etiqueta/valor) no se toca". Vale tambien para las tablas
+       que viven dentro de una ficha (la deuda exigible de Cobranza).
+       Por que a la derecha: alineadas por la derecha, las unidades, los miles y
+       los millones quedan uno debajo del otro, y una cifra mas larga se ve mas
+       larga de un vistazo -- es lo que permite comparar una columna sin leer
+       cada numero.
+       tabular-nums es la otra mitad: la tipografia del sistema trae digitos de
+       ancho variable (el 1 mas angosto que el 8), asi que sin esto los digitos
+       no se apilan en columna aunque el borde derecho coincida. Es la variante
+       tabular de la MISMA fuente, no una fuente nueva: no cambia el tamano ni
+       el peso de ningun numero.
+       Una sola clase para todo el sistema, y reemplaza a los .text-right que
+       habia sueltos en los dos resumenes: si manana el criterio cambia, cambia
+       en un lugar (el "un dato, un dueno" de B88 aplicado al CSS).
+       Sin !important y con una sola clase de especificidad: no pelea con nada
+       -- .text-right de Bootstrap ya no esta en ninguna celda de cifras.
+       ====================================================================== */
+
+    .cc-monto {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* ======================================================================
+       17. B241-bis (16/11/2026, hallazgo de Joel en /prestamos): la columna de
+       estado, con un ancho mínimo en vez de prohibirle partir.
+       Es el mismo problema de §13 pero con la solución de §14, y la razón está
+       medida: "En mora" son dos palabras cortas, así que con la columna en
+       62 px --el ancho que el navegador le da cuando TODAS las filas dicen lo
+       mismo, o sea con el filtro "En mora" puesto-- se partía en "En" y
+       "mora", 20 de 20 filas. Con "Activo" y "Finalizado" no pasa: son una
+       sola palabra y el navegador nunca las corta.
+       Por qué NO va cc-sin-partir acá: los dos rótulos largos de la
+       enumeración --"Pendiente de desembolso" (23 caracteres) y "Anulado
+       antes del desembolso" (28)-- obligarían a la columna a unos 210 px, y
+       esa tabla ya mide 911 px en un contenedor de 912, así que empujaría la
+       tabla entera a la barra horizontal incluso cuando ningún préstamo está
+       en esos dos estados.
+       El mínimo sale del dato, no de una estimación: "En mora" necesita unos
+       58 px de texto más el relleno de .table-sm (0,3rem por lado), o sea
+       ~68 px; 4,75rem deja un margen chico y no llega a los 79 px que la
+       columna ya toma sola cuando aparece "Finalizado".
+       Los dos rótulos largos siguen partiendo, que es lo correcto: un texto
+       largo baja de renglón, una unidad no se corta.
+       ====================================================================== */
+
+    .cc-celda-estado {
+        min-width: 4.75rem;
+    }
+}

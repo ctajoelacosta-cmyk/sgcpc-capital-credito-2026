@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Informe de Morosidad (Bloque C tanda 1, pedido de Joel): mismo molde que los informes del
+     Bloque B: cabecera de empresa, "Filtros aplicados:", "Emitido por" y "Página N de M". Ocho
+     columnas (operación/cliente/teléfono/C.I./días atraso/tramo/cuotas venc./monto
+     exigible), hoja horizontal; subtotales por tramo + total general en el resumen final, como
+     texto plano (mismo criterio que RESUMEN_POR_ESTADO_TEXTO de informe_prestamos.jrxml), nunca
+     recalculados acá (REGLAS_DESARROLLO.md, sección 6). Celdas de encabezado y detalle con padding desde el
+     arranque (Paso 1 del cierre del Bloque B: "Monto"/"Desembolsado por" quedaban pegados).
+     L1 Paso 3a (pedido de Joel, piloto): escudo a la izquierda del bloque de empresa, el texto
+     corrido para no encimarse. Solo el escudo: el nombre ya va en EMPRESA_RAZON_SOCIAL. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="informe_morosidad" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="762"
+              leftMargin="40" rightMargin="40" topMargin="30" bottomMargin="30"
+              whenNoDataType="NoDataSection" uuid="a1c3e5f7-7d9f-4e2a-b35b-9f2a4c6e8a6b">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <!-- Lote 2, L2-D (14/10/2026, pedido de Joel, autorizado): EMPRESA_TELEFONO/EMPRESA_WHATSAPP,
+         para el subreporte común de encabezado (encabezado_informe.jrxml). -->
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="FILTROS_APLICADOS" class="java.lang.String"/>
+    <parameter name="CANTIDAD_TOTAL" class="java.lang.Integer"/>
+    <parameter name="CAPITAL_VENCIDO_TOTAL" class="java.lang.String"/>
+    <parameter name="SALDO_TOTAL" class="java.lang.String"/>
+    <parameter name="SUBTOTALES_POR_TRAMO_TEXTO" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+
+    <field name="identificadorOperacion" class="java.lang.String"/>
+    <field name="clienteNombre" class="java.lang.String"/>
+    <field name="clienteTelefono" class="java.lang.String"/>
+    <field name="clienteCedula" class="java.lang.String"/>
+    <field name="diasAtraso" class="java.lang.Integer"/>
+    <field name="tramo" class="java.lang.String"/>
+    <field name="cuotasVencidas" class="java.lang.Integer"/>
+    <field name="montoExigible" class="java.lang.String"/>
+
+    <title>
+        <band height="112">
+            <!-- Lote 2, L2-D (14/10/2026, pedido de Joel, autorizado): encabezado unificado vía
+                 subreporte común (encabezado_informe.jrxml), ver ese archivo. El pie queda
+                 directo en pageFooter, más abajo (no dentro del subreporte: el total de páginas
+                 no se resuelve bien si se mete dentro de un subreporte invocado por página).
+                 Ajuste (pedido de Joel, revisión del piloto): la línea "Emitido/Usuario" repetía
+                 el pie, sacada; "Préstamos en mora: N" pasa a la misma línea de "Filtros
+                 aplicados". Un solo renglón antes de la tabla, sin hueco grande. -->
+            <subreport>
+                <reportElement x="0" y="0" width="762" height="76"/>
+                <subreportParameter name="LOGO"><subreportParameterExpression><![CDATA[$P{LOGO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RAZON_SOCIAL"><subreportParameterExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RUC"><subreportParameterExpression><![CDATA[$P{EMPRESA_RUC}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_DOMICILIO"><subreportParameterExpression><![CDATA[$P{EMPRESA_DOMICILIO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_TELEFONO"><subreportParameterExpression><![CDATA[$P{EMPRESA_TELEFONO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_WHATSAPP"><subreportParameterExpression><![CDATA[$P{EMPRESA_WHATSAPP}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="TITULO"><subreportParameterExpression><![CDATA["INFORME DE MOROSIDAD"]]></subreportParameterExpression></subreportParameter>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
+                <subreportExpression class="java.io.InputStream"><![CDATA[Thread.currentThread().getContextClassLoader().getResourceAsStream("reportes/encabezado_informe.jasper")]]></subreportExpression>
+            </subreport>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="82" width="762" height="16" uuid="b2d4f6a8-0001-0001-0001-000000000004"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Filtros aplicados: " + $P{FILTROS_APLICADOS} + "  ·  Préstamos en mora: " + $P{CANTIDAD_TOTAL}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="24">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="70" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-000000000001"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Operación]]></text>
+            </staticText>
+            <!-- Ajuste de Joel (revisión del piloto L2-D): "Cliente" era angosta (el nombre se
+                 cortaba en 2 renglones), "Monto exigible" ocupaba casi media hoja de más. Se le
+                 quita ancho a Monto exigible y se lo da a Cliente; Teléfono/C.I. y las columnas de
+                 abajo se corren en consecuencia. "Cuotas venc." pasa a "Cuotas vencidas" en un
+                 renglón, mismo tamaño de letra (7) que el resto. -->
+            <staticText>
+                <reportElement mode="Opaque" x="70" y="0" width="220" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-000000000002"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Cliente]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="290" y="0" width="70" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-000000000003"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Teléfono]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="360" y="0" width="75" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-000000000004"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[C.I.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="435" y="0" width="55" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-00000000000a">
+                </reportElement>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Días atraso]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="490" y="0" width="55" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-00000000000b">
+                </reportElement>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Tramo]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="545" y="0" width="90" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-00000000000c">
+                </reportElement>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Cuotas vencidas]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="635" y="0" width="127" height="24" backcolor="#DCDCDC" uuid="c3e5f7a9-0002-0002-0002-00000000000d">
+                </reportElement>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Monto exigible]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="13">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="70" height="13" uuid="d4f6a8b0-0003-0003-0003-000000000001"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{identificadorOperacion}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="70" y="0" width="220" height="13" uuid="d4f6a8b0-0003-0003-0003-000000000002"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{clienteNombre}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="290" y="0" width="70" height="13" uuid="d4f6a8b0-0003-0003-0003-000000000003"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{clienteTelefono}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="360" y="0" width="75" height="13" uuid="d4f6a8b0-0003-0003-0003-000000000004"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{clienteCedula}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="435" y="0" width="55" height="13" uuid="d4f6a8b0-0003-0003-0003-00000000000a">
+                </reportElement>
+                <box leftPadding="2" rightPadding="2"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{diasAtraso}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="490" y="0" width="55" height="13" uuid="d4f6a8b0-0003-0003-0003-00000000000b">
+                </reportElement>
+                <box leftPadding="2" rightPadding="2"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{tramo}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="545" y="0" width="90" height="13" uuid="d4f6a8b0-0003-0003-0003-00000000000c">
+                </reportElement>
+                <box leftPadding="2" rightPadding="2"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{cuotasVencidas}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="635" y="0" width="127" height="13" uuid="d4f6a8b0-0003-0003-0003-00000000000d">
+                </reportElement>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{montoExigible}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="500" height="14" uuid="e5a7b9c1-0004-0004-0004-000000000001"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10/Lote 2 (pedido de Joel, L2-D): "de" sin espacio final, total alineado a la
+                 izquierda, mismo arreglo que el resto de los reportes. -->
+            <textField>
+                <reportElement x="600" y="0" width="148" height="14" uuid="e5a7b9c1-0004-0004-0004-000000000002"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="748" y="0" width="14" height="14" uuid="e5a7b9c1-0004-0004-0004-000000000003"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="220">
+            <line>
+                <reportElement x="0" y="0" width="762" height="1" uuid="f6b8c0d2-0005-0005-0005-000000000001"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="10" width="500" height="16" uuid="f6b8c0d2-0005-0005-0005-000000000002"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Total general: " + $P{CANTIDAD_TOTAL}
++ "  —  Capital vencido " + $P{CAPITAL_VENCIDO_TOTAL} + "  —  Saldo " + $P{SALDO_TOTAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="34" width="500" height="14" uuid="f6b8c0d2-0005-0005-0005-000000000003"/>
+                <textElement><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[Subtotales por tramo de atraso:]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="50" width="500" height="14" uuid="f6b8c0d2-0005-0005-0005-000000000004"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{SUBTOTALES_POR_TRAMO_TEXTO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+    <noData>
+        <band height="220">
+            <subreport>
+                <reportElement x="0" y="0" width="762" height="76"/>
+                <subreportParameter name="LOGO"><subreportParameterExpression><![CDATA[$P{LOGO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RAZON_SOCIAL"><subreportParameterExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RUC"><subreportParameterExpression><![CDATA[$P{EMPRESA_RUC}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_DOMICILIO"><subreportParameterExpression><![CDATA[$P{EMPRESA_DOMICILIO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_TELEFONO"><subreportParameterExpression><![CDATA[$P{EMPRESA_TELEFONO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_WHATSAPP"><subreportParameterExpression><![CDATA[$P{EMPRESA_WHATSAPP}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="TITULO"><subreportParameterExpression><![CDATA["INFORME DE MOROSIDAD"]]></subreportParameterExpression></subreportParameter>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
+                <subreportExpression class="java.io.InputStream"><![CDATA[Thread.currentThread().getContextClassLoader().getResourceAsStream("reportes/encabezado_informe.jasper")]]></subreportExpression>
+            </subreport>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="82" width="762" height="16" uuid="a7c9d1e3-0006-0006-0006-000000000004"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Filtros aplicados: " + $P{FILTROS_APLICADOS} + "  ·  Préstamos en mora: " + $P{CANTIDAD_TOTAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="112" width="762" height="20" uuid="a7c9d1e3-0006-0006-0006-000000000006"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="10" isBold="true" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[No hay préstamos en mora en este momento.]]></text>
+            </staticText>
+        </band>
+    </noData>
+</jasperReport>

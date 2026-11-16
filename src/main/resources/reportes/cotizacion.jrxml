@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Cotización/simulación de préstamo imprimible (C-4.1, pedido de Joel): no es un "Informe" con
+     filtros sobre datos guardados; RF-33 sigue sin persistir ningún registro, esto solo imprime
+     lo que ServicioCotizacion.cotizar (mismo motor) ya calculó. Encabezado de empresa (con logo y
+     teléfono/WhatsApp, V9/RF01-F/K) + datos del interesado (opcionales, cada uno por separado:
+     "Nombre: ______________" / "C.I.: ______________" si vino vacío; RF01-J) +
+     los datos de la simulación (monto, plazo, periodicidad, TEA, TNA, tasa mensual, primera
+     cuota con IVA, total a pagar, CFT; RF01-H/I) + el plan de pagos completo con estilo V9
+     (incluido el saldo posterior, que la pantalla no muestra) + la leyenda de validez + la caja
+     "¿Qué significa cada término?" (RF01-H, GlosarioFinanciero). El resumen final usa
+     splitType="Prevent", mismo motivo que C-3b: con un plazo largo (hasta 24 cuotas) el plan puede
+     cruzar varias páginas, y el resumen no debe quedar partido ni dejar una página casi vacía al
+     final. Celdas de encabezado y detalle con padding desde el arranque (Paso 1 del cierre del
+     Bloque B). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="cotizacion" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="762"
+              leftMargin="40" rightMargin="40" topMargin="30" bottomMargin="30"
+              whenNoDataType="NoDataSection" uuid="e5f6a7b8-5005-5005-5005-500000000001">
+
+    <!-- V9 (pedido de Joel, mismos 4 colores del piloto de informe_historial_parametros): título
+         azul, encabezados de columna blancos sobre azul, filas alternadas en gris muy claro. -->
+    <style name="TituloInforme" forecolor="#0C325C" fontName="DejaVu Sans" fontSize="13" isBold="true"/>
+    <style name="EncabezadoColumna" forecolor="#FFFFFF" mode="Opaque" backcolor="#0C325C" fontName="DejaVu Sans" fontSize="7" isBold="true"/>
+    <style name="FilaAlterna" mode="Opaque" backcolor="#F4F6F8"/>
+    <style name="TotalFinal" forecolor="#0C325C" fontName="DejaVu Sans" fontSize="9" isBold="true"/>
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="NOMBRE_INTERESADO" class="java.lang.String"/>
+    <parameter name="CEDULA_INTERESADO" class="java.lang.String"/>
+    <parameter name="MONTO" class="java.lang.String"/>
+    <parameter name="PLAZO" class="java.lang.String"/>
+    <parameter name="PERIODICIDAD" class="java.lang.String"/>
+    <parameter name="TEA" class="java.lang.String"/>
+    <parameter name="TNA" class="java.lang.String"/>
+    <parameter name="TASA_PERIODO" class="java.lang.String"/>
+    <parameter name="CUOTA" class="java.lang.String"/>
+    <parameter name="TOTAL_A_PAGAR" class="java.lang.String"/>
+    <parameter name="CFT" class="java.lang.String"/>
+    <parameter name="LEYENDA" class="java.lang.String"/>
+    <!-- RF01-H (pedido de Joel): texto completo de GlosarioFinanciero, ya resuelto en Java
+         (ServicioInformes); el .jrxml solo lo muestra, no calcula ni conoce esa clase. -->
+    <parameter name="GLOSARIO_TEA" class="java.lang.String"/>
+    <parameter name="GLOSARIO_TNA" class="java.lang.String"/>
+    <parameter name="GLOSARIO_CFT" class="java.lang.String"/>
+    <parameter name="GLOSARIO_IVA" class="java.lang.String"/>
+    <parameter name="GLOSARIO_CAPITAL" class="java.lang.String"/>
+    <parameter name="GLOSARIO_INTERES" class="java.lang.String"/>
+
+    <field name="numeroCuota" class="java.lang.Integer"/>
+    <field name="vencimiento" class="java.lang.String"/>
+    <field name="capital" class="java.lang.String"/>
+    <field name="interes" class="java.lang.String"/>
+    <field name="iva" class="java.lang.String"/>
+    <field name="cuota" class="java.lang.String"/>
+    <field name="saldo" class="java.lang.String"/>
+
+    <title>
+        <band height="196">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42" uuid="e5f6a7b8-5005-5005-5005-50000000000b"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="712" height="46" uuid="e5f6a7b8-5005-5005-5005-500000000002"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <!-- Corrección de Joel: el título se pisaba con "Emitido: ... Usuario: ..." porque,
+                 al agregar el logo y la 4ta línea de teléfono/WhatsApp (grupo 7), se corrió el
+                 título hacia abajo pero NO los elementos siguientes; positionType="Float" solo
+                 empuja un elemento si el que lo PRECEDE se estiró más de su alto nominal; no
+                 evita que dos elementos fijos se hayan declarado con posiciones que se superponen
+                 entre sí. Esta secuencia completa quedó recalculada a mano, uno debajo del otro
+                 sin huecos de más (el gap grande de antes era la banda nominal de 260 sobrando
+                 contra un contenido real de ~190). -->
+            <!-- Lote 2, L2-C (14/10/2026, pedido de Joel): franja de color institucional en vez
+                 de la línea verde V9. -->
+            <rectangle>
+                <reportElement positionType="Float" x="0" y="50" width="762" height="5" mode="Opaque" backcolor="#0C325C" uuid="e5f6a7b8-5005-5005-5005-500000000003"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="55" width="762" height="18" style="TituloInforme" uuid="e5f6a7b8-5005-5005-5005-500000000004"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[COTIZACIÓN / SIMULACIÓN DE PRÉSTAMO]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="76" width="762" height="12" uuid="e5f6a7b8-5005-5005-5005-500000000005"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Emitido: " + $P{FECHA_EMISION} + "  ·  Usuario: " + $P{USUARIO_EMISOR}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="91" width="762" height="12" uuid="e5f6a7b8-5005-5005-5005-500000000006"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{NOMBRE_INTERESADO} + "  ·  " + $P{CEDULA_INTERESADO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="106" width="762" height="1" uuid="e5f6a7b8-5005-5005-5005-500000000007"/>
+            </line>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="111" width="380" height="58" uuid="e5f6a7b8-5005-5005-5005-500000000008"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Monto: " + $P{MONTO}
++ "\nPlazo: " + $P{PLAZO}
++ "\nPeriodicidad: " + $P{PERIODICIDAD}
++ "\nTEA: " + $P{TEA}
++ "\nTNA: " + $P{TNA}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="390" y="111" width="372" height="48" uuid="e5f6a7b8-5005-5005-5005-500000000009"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Tasa mensual: " + $P{TASA_PERIODO}
++ "\nPrimera cuota (con IVA): " + $P{CUOTA}
++ "\nTotal a pagar: " + $P{TOTAL_A_PAGAR}
++ "\nCFT: " + $P{CFT}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="174" width="762" height="16" uuid="e5f6a7b8-5005-5005-5005-50000000000a"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Plan de pagos]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="24">
+            <staticText>
+                <reportElement x="0" y="0" width="40" height="24" style="EncabezadoColumna" uuid="e5f6a7b8-5005-5005-5005-500000000011"/>
+                <box leftPadding="2" rightPadding="2"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[N.º]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="40" y="0" width="85" height="24" style="EncabezadoColumna" uuid="e5f6a7b8-5005-5005-5005-500000000012"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"/>
+                <text><![CDATA[Vencimiento]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="125" y="0" width="120" height="24" style="EncabezadoColumna" uuid="e5f6a7b8-5005-5005-5005-500000000013"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <text><![CDATA[Capital]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="245" y="0" width="120" height="24" style="EncabezadoColumna" uuid="e5f6a7b8-5005-5005-5005-500000000014"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <text><![CDATA[Interés]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="365" y="0" width="110" height="24" style="EncabezadoColumna" uuid="e5f6a7b8-5005-5005-5005-500000000015"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <text><![CDATA[IVA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="475" y="0" width="130" height="24" style="EncabezadoColumna" uuid="e5f6a7b8-5005-5005-5005-500000000016"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <text><![CDATA[Cuota]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="605" y="0" width="157" height="24" style="EncabezadoColumna" uuid="e5f6a7b8-5005-5005-5005-500000000017"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"/>
+                <text><![CDATA[Saldo]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="13">
+            <!-- V9: fila alternada, PRIMER elemento del detalle (ver informe_historial_parametros,
+                 piloto ya aprobado por Joel). -->
+            <rectangle>
+                <reportElement x="0" y="0" width="762" height="13" style="FilaAlterna" uuid="e5f6a7b8-5005-5005-5005-50000000002a">
+                    <printWhenExpression><![CDATA[$V{REPORT_COUNT} % 2 == 0]]></printWhenExpression>
+                </reportElement>
+                <graphicElement><pen lineColor="#F4F6F8"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="0" y="0" width="40" height="13" uuid="e5f6a7b8-5005-5005-5005-500000000021"/>
+                <box leftPadding="2" rightPadding="2"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{numeroCuota}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="40" y="0" width="85" height="13" uuid="e5f6a7b8-5005-5005-5005-500000000022"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{vencimiento}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="125" y="0" width="120" height="13" uuid="e5f6a7b8-5005-5005-5005-500000000023"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{capital}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="245" y="0" width="120" height="13" uuid="e5f6a7b8-5005-5005-5005-500000000024"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{interes}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="365" y="0" width="110" height="13" uuid="e5f6a7b8-5005-5005-5005-500000000025"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{iva}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="475" y="0" width="130" height="13" uuid="e5f6a7b8-5005-5005-5005-500000000026"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{cuota}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="605" y="0" width="157" height="13" uuid="e5f6a7b8-5005-5005-5005-500000000027"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{saldo}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="500" height="14" uuid="e5f6a7b8-5005-5005-5005-500000000031"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10 (pedido de Joel, Lote 2 L2-C): mismo patrón corregido que el resto de los
+                 documentos: "de" sin espacio final, total alineado a la izquierda. -->
+            <textField>
+                <reportElement x="600" y="0" width="148" height="14" uuid="e5f6a7b8-5005-5005-5005-500000000032"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="748" y="0" width="14" height="14" uuid="e5f6a7b8-5005-5005-5005-500000000033"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <!-- Corrección de Joel: la leyenda y el glosario deben quedar pegados a la tabla (no
+             solos en una página 2); objetivo: 12 cuotas con glosario completo en una sola
+             página. Dos columnas (TEA/TNA/CFT a la izquierda, IVA/Capital/Interés a la derecha)
+             en vez de una sola columna larga: con los 6 términos (antes solo 3) una columna
+             única no entraba. splitType="Prevent" (ya estaba): si ni así entra (plazos largos,
+             24 cuotas), el resumen entero pasa a la página siguiente sin partirse, nunca a
+             medias. -->
+        <band height="110" splitType="Prevent">
+            <line>
+                <reportElement x="0" y="0" width="762" height="1" uuid="e5f6a7b8-5005-5005-5005-500000000041"/>
+            </line>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="4" width="762" height="18" uuid="e5f6a7b8-5005-5005-5005-500000000042"/>
+                <textElement><font fontName="DejaVu Sans" size="7" isItalic="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{LEYENDA}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="24" width="762" height="1" uuid="e5f6a7b8-5005-5005-5005-500000000043"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="28" width="762" height="12" uuid="e5f6a7b8-5005-5005-5005-500000000044"/>
+                <textElement><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[¿Qué significa cada término?]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="42" width="375" height="18" uuid="e5f6a7b8-5005-5005-5005-500000000045"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{GLOSARIO_TEA}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="62" width="375" height="18" uuid="e5f6a7b8-5005-5005-5005-500000000046"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{GLOSARIO_TNA}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="82" width="375" height="18" uuid="e5f6a7b8-5005-5005-5005-500000000047"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{GLOSARIO_CFT}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="387" y="42" width="375" height="18" uuid="e5f6a7b8-5005-5005-5005-500000000048"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{GLOSARIO_IVA}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="387" y="62" width="375" height="18" uuid="e5f6a7b8-5005-5005-5005-500000000049"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{GLOSARIO_CAPITAL}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="387" y="82" width="375" height="18" uuid="e5f6a7b8-5005-5005-5005-50000000004a"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{GLOSARIO_INTERES}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+    <noData>
+        <band height="220">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42" uuid="e5f6a7b8-5005-5005-5005-50000000005c"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="712" height="52" uuid="e5f6a7b8-5005-5005-5005-500000000051"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="64" width="762" height="20" style="TituloInforme" uuid="e5f6a7b8-5005-5005-5005-500000000052"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[COTIZACIÓN / SIMULACIÓN DE PRÉSTAMO]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="80" width="762" height="20" uuid="e5f6a7b8-5005-5005-5005-500000000053"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="10" isBold="true" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[Sin plan de pagos para mostrar.]]></text>
+            </staticText>
+        </band>
+    </noData>
+</jasperReport>

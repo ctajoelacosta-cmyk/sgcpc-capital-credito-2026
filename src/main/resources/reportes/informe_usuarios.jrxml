@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Informe de Usuarios y accesos (C-4.2, pedido de Joel), mismo molde que los informes
+     anteriores. Siete columnas (usuario/nombre/C.I./perfil/estado/debe cambiar contraseña/último
+     acceso); totales por perfil y por estado en el resumen final, con splitType="Prevent" (mismo
+     criterio que C-3b/C-4.1). Nunca lleva el hash de la contraseña ni ningún otro dato de
+     seguridad (pedido explícito de Joel): el campo ni siquiera llega a este .jrxml, las filas ya
+     vienen armadas sin él (ServicioReportes.construirFilasInformeUsuarios). Celdas de encabezado y
+     detalle con padding desde el arranque (Paso 1 del cierre del Bloque B). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="informe_usuarios" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="762"
+              leftMargin="40" rightMargin="40" topMargin="30" bottomMargin="30"
+              whenNoDataType="NoDataSection" uuid="f6a7b8c9-6006-6006-6006-600000000001">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="FILTROS_APLICADOS" class="java.lang.String"/>
+    <parameter name="CANTIDAD_TOTAL" class="java.lang.Integer"/>
+    <parameter name="POR_PERFIL_TEXTO" class="java.lang.String"/>
+    <parameter name="POR_ESTADO_TEXTO" class="java.lang.String"/>
+
+    <field name="nombreUsuario" class="java.lang.String"/>
+    <field name="nombreCompleto" class="java.lang.String"/>
+    <field name="cedula" class="java.lang.String"/>
+    <field name="perfil" class="java.lang.String"/>
+    <field name="estado" class="java.lang.String"/>
+    <field name="debeCambiarContrasena" class="java.lang.String"/>
+    <field name="ultimoAcceso" class="java.lang.String"/>
+
+    <title>
+        <band height="140">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="762" height="40" uuid="f6a7b8c9-6006-6006-6006-600000000002"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="46" width="762" height="1" uuid="f6a7b8c9-6006-6006-6006-600000000003"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="52" width="762" height="20" uuid="f6a7b8c9-6006-6006-6006-600000000004"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[INFORME DE USUARIOS Y ACCESOS]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="76" width="762" height="28" uuid="f6a7b8c9-6006-6006-6006-600000000005"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Filtros aplicados: " + $P{FILTROS_APLICADOS}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="108" width="762" height="28" uuid="f6a7b8c9-6006-6006-6006-600000000006"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Emitido: " + $P{FECHA_EMISION} + "  ·  Usuario: " + $P{USUARIO_EMISOR}
++ "  ·  Usuarios: " + $P{CANTIDAD_TOTAL}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="24">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="90" height="24" backcolor="#DCDCDC" uuid="f6a7b8c9-6006-6006-6006-600000000011"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Usuario]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="90" y="0" width="170" height="24" backcolor="#DCDCDC" uuid="f6a7b8c9-6006-6006-6006-600000000012"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Nombre]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="260" y="0" width="85" height="24" backcolor="#DCDCDC" uuid="f6a7b8c9-6006-6006-6006-600000000013"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[C.I.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="345" y="0" width="130" height="24" backcolor="#DCDCDC" uuid="f6a7b8c9-6006-6006-6006-600000000014"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Perfil]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="475" y="0" width="80" height="24" backcolor="#DCDCDC" uuid="f6a7b8c9-6006-6006-6006-600000000015"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Estado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="555" y="0" width="90" height="24" backcolor="#DCDCDC" uuid="f6a7b8c9-6006-6006-6006-600000000016"/>
+                <box leftPadding="2" rightPadding="2"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="6.5" isBold="true"/></textElement>
+                <text><![CDATA[Debe cambiar contraseña]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="645" y="0" width="117" height="24" backcolor="#DCDCDC" uuid="f6a7b8c9-6006-6006-6006-600000000017"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Último acceso]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="13">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="90" height="13" uuid="f6a7b8c9-6006-6006-6006-600000000021"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{nombreUsuario}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="90" y="0" width="170" height="13" uuid="f6a7b8c9-6006-6006-6006-600000000022"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{nombreCompleto}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="260" y="0" width="85" height="13" uuid="f6a7b8c9-6006-6006-6006-600000000023"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{cedula}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="345" y="0" width="130" height="13" uuid="f6a7b8c9-6006-6006-6006-600000000024"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{perfil}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="475" y="0" width="80" height="13" uuid="f6a7b8c9-6006-6006-6006-600000000025"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{estado}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="555" y="0" width="90" height="13" uuid="f6a7b8c9-6006-6006-6006-600000000026"/>
+                <box leftPadding="2" rightPadding="2"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{debeCambiarContrasena}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="645" y="0" width="117" height="13" uuid="f6a7b8c9-6006-6006-6006-600000000027"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{ultimoAcceso}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="500" height="14" uuid="f6a7b8c9-6006-6006-6006-600000000031"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="600" y="0" width="148" height="14" uuid="f6a7b8c9-6006-6006-6006-600000000032"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="748" y="0" width="14" height="14" uuid="f6a7b8c9-6006-6006-6006-600000000033"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="60" splitType="Prevent">
+            <line>
+                <reportElement x="0" y="0" width="762" height="1" uuid="f6a7b8c9-6006-6006-6006-600000000041"/>
+            </line>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="8" width="380" height="48" uuid="f6a7b8c9-6006-6006-6006-600000000042"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Total: " + $P{CANTIDAD_TOTAL} + " usuario(s)\nPor perfil:\n" + $P{POR_PERFIL_TEXTO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="390" y="8" width="372" height="48" uuid="f6a7b8c9-6006-6006-6006-600000000043"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Por estado:\n" + $P{POR_ESTADO_TEXTO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+    <noData>
+        <band height="220">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="762" height="40" uuid="f6a7b8c9-6006-6006-6006-600000000051"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="52" width="762" height="20" uuid="f6a7b8c9-6006-6006-6006-600000000052"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[INFORME DE USUARIOS Y ACCESOS]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="80" width="762" height="20" uuid="f6a7b8c9-6006-6006-6006-600000000053"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="10" isBold="true" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[No hay usuarios para mostrar.]]></text>
+            </staticText>
+        </band>
+    </noData>
+</jasperReport>

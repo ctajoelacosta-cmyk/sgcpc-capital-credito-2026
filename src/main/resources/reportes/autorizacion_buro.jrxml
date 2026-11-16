@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Autorización para consulta de información crediticia (RF03/RF04, pedido de Joel): botón
+     "Generar autorización" de la fila 4 del Expediente / Paso A de "③ Autorización y buró".
+     Solo la firma del cliente va a mano; el sistema imprime lugar, fecha y hora de emisión,
+     vigencia (buro.dias_vigencia_consentimiento) y un número único (numeradores, clave
+     AUTORIZACION). Texto legal único: infraestructura.TextoLegalAutorizacionBuro. Mismo estilo V9
+     (logo, colores de marca) que cotizacion.jrxml/requisitos_prestamo.jrxml; un solo título band,
+     sin tabla de detalle, como constancia_devolucion.jrxml. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="autorizacion_buro" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              uuid="e5f6a7b8-7007-7007-7007-700000000001">
+
+    <style name="TituloInforme" forecolor="#0C325C" fontName="DejaVu Sans" fontSize="13" isBold="true"/>
+    <style name="RecuadroUsoInterno" mode="Opaque" backcolor="#F4F6F8"/>
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="NUMERO_AUTORIZACION" class="java.lang.String"/>
+    <parameter name="LUGAR_FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="VIGENTE_HASTA" class="java.lang.String"/>
+    <parameter name="TEXTO_LEGAL" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="CLIENTE_DOMICILIO" class="java.lang.String"/>
+    <parameter name="CLIENTE_TELEFONO" class="java.lang.String"/>
+
+    <title>
+        <band height="460">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42" uuid="e5f6a7b8-7007-7007-7007-70000000000b"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="431" height="46" uuid="e5f6a7b8-7007-7007-7007-700000000002"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <!-- Lote 2, L2-C (14/10/2026, pedido de Joel): franja de color institucional en vez
+                 de la línea verde V9. -->
+            <rectangle>
+                <reportElement positionType="Float" x="0" y="50" width="481" height="5" mode="Opaque" backcolor="#0C325C" uuid="e5f6a7b8-7007-7007-7007-700000000003"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="55" width="481" height="34" style="TituloInforme" uuid="e5f6a7b8-7007-7007-7007-700000000004"/>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[AUTORIZACIÓN PARA CONSULTA DE
+INFORMACIÓN CREDITICIA]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="91" width="481" height="12" uuid="e5f6a7b8-7007-7007-7007-700000000005"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["N.º " + $P{NUMERO_AUTORIZACION}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="107" width="481" height="14" uuid="e5f6a7b8-7007-7007-7007-700000000006"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{LUGAR_FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="123" width="481" height="14" uuid="e5f6a7b8-7007-7007-7007-700000000007"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Vigente hasta " + $P{VIGENTE_HASTA}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="143" width="481" height="1" uuid="e5f6a7b8-7007-7007-7007-700000000008"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="150" width="481" height="14" uuid="e5f6a7b8-7007-7007-7007-700000000009"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[Datos del cliente]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="166" width="481" height="48" uuid="e5f6a7b8-7007-7007-7007-70000000000a"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Nombre: " + $P{CLIENTE_NOMBRE}
++ "\nC.I.: " + $P{CLIENTE_CEDULA}
++ "\nDomicilio: " + $P{CLIENTE_DOMICILIO}
++ "\nTeléfono: " + $P{CLIENTE_TELEFONO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="218" width="481" height="72" uuid="e5f6a7b8-7007-7007-7007-70000000000c"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{TEXTO_LEGAL}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="150" y="304" width="180" height="1" uuid="e5f6a7b8-7007-7007-7007-70000000000d"/>
+            </line>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="150" y="308" width="180" height="14" uuid="e5f6a7b8-7007-7007-7007-70000000000e"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{CLIENTE_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="150" y="322" width="180" height="14" uuid="e5f6a7b8-7007-7007-7007-70000000000f"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["C.I. N.º " + $P{CLIENTE_CEDULA}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="150" y="336" width="180" height="14" uuid="e5f6a7b8-7007-7007-7007-700000000010"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Firma del cliente]]></text>
+            </staticText>
+            <rectangle>
+                <reportElement positionType="Float" x="0" y="368" width="481" height="72" style="RecuadroUsoInterno" uuid="e5f6a7b8-7007-7007-7007-700000000011"/>
+                <graphicElement><pen lineColor="#CBD5E1"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement positionType="Float" x="8" y="374" width="200" height="14" uuid="e5f6a7b8-7007-7007-7007-700000000012"/>
+                <textElement><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                <text><![CDATA[USO INTERNO]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="8" y="390" width="465" height="28" uuid="e5f6a7b8-7007-7007-7007-700000000013"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["N.º " + $P{NUMERO_AUTORIZACION} + "  ·  Generada por " + $P{USUARIO_EMISOR}
++ "  ·  " + $P{LUGAR_FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- RF03 Parte 3 (pedido de Joel): reemplaza la línea "Emitido por..." que estaba
+                 abajo de todo (repetía exactamente este mismo recuadro); línea en blanco para
+                 completar a mano al recibir el escaneo firmado. -->
+            <staticText>
+                <reportElement positionType="Float" x="8" y="418" width="465" height="14" uuid="e5f6a7b8-7007-7007-7007-700000000015"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Recibido y verificado por: ____________________   Firma: ____________]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <!-- Lote 2, L2-C (14/10/2026, pedido de Joel): pie "Emitido por"/"Página X de Y": no
+         existía (hallazgo ya conocido). FECHA_EMISION se sobrescribe en Java
+         (construirPdfAutorizacionBuro) con la misma fecha/hora real de emisión que ya usa
+         LUGAR_FECHA_EMISION en el cuerpo (D-94), no Reloj.ahora(). -->
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="331" y="0" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="0" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

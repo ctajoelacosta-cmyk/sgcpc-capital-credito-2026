@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Encabezado común de los informes de gestión (Lote 2, L2-D, pedido de Joel, 14/10/2026):
+     logo + datos de la empresa (con teléfono/WhatsApp) + franja de color institucional + título,
+     reutilizado por los informe_*.jrxml Landscape 842x595 (columnWidth=762); informe_clientes.jrxml
+     (el único Portrait) queda afuera, con estilo directo. Mismo mecanismo que
+     encabezado_constancia.jrxml (L2-B): cada maestro carga este .jasper directo del classpath
+     del webapp con Thread.currentThread().getContextClassLoader().getResourceAsStream(
+     "reportes/encabezado_informe.jasper"), sin SUBREPORT_DIR ni parámetro nuevo de Java. Se
+     invoca dos veces en cada maestro (title y noData), nunca desde pageFooter: el pie
+     ("Emitido por" + "Página X de Y") queda DIRECTO en cada maestro, porque el total de páginas
+     (evaluationTime="Report") solo se resuelve contra el reporte que se está llenando, no contra
+     un subreporte invocado por página (confirmado con Joel antes de construir esto). SOLO
+     encabezado, nada de pie acá. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="encabezado_informe" pageWidth="762" pageHeight="76" columnWidth="762"
+              leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="TITULO" class="java.lang.String"/>
+
+    <title>
+        <band height="76">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <!-- Joel (14/10/2026): 3 renglones: "razón social — RUC" / "domicilio" /
+                 "Tel. · WhatsApp". -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="712" height="44"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL} + " — RUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <rectangle>
+                <reportElement x="0" y="48" width="762" height="5" mode="Opaque" backcolor="#0C325C"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="0" y="58" width="762" height="18" forecolor="#0C325C"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="12" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TITULO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+</jasperReport>

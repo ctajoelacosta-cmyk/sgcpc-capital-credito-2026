@@ -1,0 +1,14 @@
+# D-113 (Bloque 7/E10): plantilla para la base dedicada al humo (sgcpc_db_pruebas), separada de
+# sgcpc_db (real/demo) y de sgcpc_db_restaurada (solo para probar restauraciones, D-112).
+# Copiar a bd.properties.pruebas (mismo directorio) y completar la contraseña real -- ese archivo
+# también esta en .gitignore, nunca se sube.
+#
+# "entorno=pruebas" es la marca que activa el cartel "BASE DE PRUEBAS" (FabricaConexionBD.
+# esBaseDePruebas) y la guarda de humo_http.sh -- nunca se infiere del nombre de la base.
+#
+# No se usa manualmente: bd/usar_base_pruebas.sh copia este archivo sobre bd.properties antes de
+# correr el humo, y bd/usar_base_real.sh lo vuelve a dejar como estaba.
+bd.url=jdbc:postgresql://localhost:5432/sgcpc_db_pruebas
+bd.usuario=sgcpc_user
+bd.contrasena=
+entorno=pruebas

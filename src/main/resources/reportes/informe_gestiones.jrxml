@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Informe de Gestiones de cobranza (Bloque C tanda 3, pedido de Joel; corregido en C-3b): fecha,
+     operación, contactado, tipo, resultado, promesa (fecha y monto combinados), si se cumplió y
+     quién registró. Totales: cantidad por tipo, promesas hechas, cumplidas, vencidas sin cumplir y
+     pendientes (aún no vencen). El resumen va en un bloque summary con splitType="Prevent" (C-3b:
+     antes, con muchas filas, el bloque de totales podía quedar partido entre la última página de
+     detalle y una página siguiente casi vacía; Prevent fuerza a que entre entero en la página
+     anterior o arranque entero en una nueva, nunca dividido). Celdas de encabezado y detalle con
+     padding desde el arranque (Paso 1 del cierre del Bloque B). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="informe_gestiones" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="762"
+              leftMargin="40" rightMargin="40" topMargin="30" bottomMargin="30"
+              whenNoDataType="NoDataSection" uuid="a1b2c3d4-1001-1001-1001-100000000001">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="FILTROS_APLICADOS" class="java.lang.String"/>
+    <parameter name="CANTIDAD_TOTAL" class="java.lang.Integer"/>
+    <parameter name="CANTIDAD_PROMESAS_HECHAS" class="java.lang.Integer"/>
+    <parameter name="CANTIDAD_CUMPLIDAS" class="java.lang.Integer"/>
+    <parameter name="CANTIDAD_VENCIDAS_SIN_CUMPLIR" class="java.lang.Integer"/>
+    <parameter name="CANTIDAD_PENDIENTES" class="java.lang.Integer"/>
+    <parameter name="POR_TIPO_TEXTO" class="java.lang.String"/>
+
+    <field name="fechaHora" class="java.lang.String"/>
+    <field name="identificadorOperacion" class="java.lang.String"/>
+    <field name="contactadoNombre" class="java.lang.String"/>
+    <field name="tipoEtiqueta" class="java.lang.String"/>
+    <field name="resultado" class="java.lang.String"/>
+    <field name="promesaTexto" class="java.lang.String"/>
+    <field name="cumplidaTexto" class="java.lang.String"/>
+    <field name="registradoPorNombre" class="java.lang.String"/>
+
+    <title>
+        <band height="150">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="762" height="40" uuid="a1b2c3d4-1001-1001-1001-100000000002"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="46" width="762" height="1" uuid="a1b2c3d4-1001-1001-1001-100000000003"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="52" width="762" height="20" uuid="a1b2c3d4-1001-1001-1001-100000000004"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[INFORME DE GESTIONES DE COBRANZA]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="76" width="762" height="28" uuid="a1b2c3d4-1001-1001-1001-100000000005"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Filtros aplicados: " + $P{FILTROS_APLICADOS}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="108" width="762" height="28" uuid="a1b2c3d4-1001-1001-1001-100000000006"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Emitido: " + $P{FECHA_EMISION} + "  ·  Usuario: " + $P{USUARIO_EMISOR}
++ "  ·  Gestiones: " + $P{CANTIDAD_TOTAL}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="24">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="85" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000011"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Fecha/hora]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="85" y="0" width="65" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000012"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Operación]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="150" y="0" width="120" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000013"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Contactado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="270" y="0" width="80" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000014"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Tipo]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="350" y="0" width="140" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000015"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Resultado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="490" y="0" width="130" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000016"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Promesa]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="620" y="0" width="50" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000017"/>
+                <box leftPadding="2" rightPadding="2"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Cumplida]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="670" y="0" width="92" height="24" backcolor="#DCDCDC" uuid="a1b2c3d4-1001-1001-1001-100000000018"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="6.5" isBold="true"/></textElement>
+                <text><![CDATA[Quién registró]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="13">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="85" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000021"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="6.5"/></textElement>
+                <textFieldExpression><![CDATA[$F{fechaHora}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="85" y="0" width="65" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000022"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{identificadorOperacion}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="150" y="0" width="120" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000023"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{contactadoNombre}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="270" y="0" width="80" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000024"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{tipoEtiqueta}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="350" y="0" width="140" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000025"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{resultado}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="490" y="0" width="130" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000026"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{promesaTexto}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="620" y="0" width="50" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000027"/>
+                <box leftPadding="2" rightPadding="2"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{cumplidaTexto}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="670" y="0" width="92" height="13" uuid="a1b2c3d4-1001-1001-1001-100000000028"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{registradoPorNombre}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="500" height="14" uuid="a1b2c3d4-1001-1001-1001-100000000031"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="600" y="0" width="148" height="14" uuid="a1b2c3d4-1001-1001-1001-100000000032"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="748" y="0" width="14" height="14" uuid="a1b2c3d4-1001-1001-1001-100000000033"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="76" splitType="Prevent">
+            <line>
+                <reportElement x="0" y="0" width="762" height="1" uuid="a1b2c3d4-1001-1001-1001-100000000041"/>
+            </line>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="8" width="380" height="60" uuid="a1b2c3d4-1001-1001-1001-100000000042"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["Por tipo:\n" + $P{POR_TIPO_TEXTO}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="390" y="8" width="372" height="60" uuid="a1b2c3d4-1001-1001-1001-100000000043"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Promesas hechas: " + $P{CANTIDAD_PROMESAS_HECHAS}
++ "\nCumplidas: " + $P{CANTIDAD_CUMPLIDAS}
++ "\nVencidas sin cumplir: " + $P{CANTIDAD_VENCIDAS_SIN_CUMPLIR}
++ "\nPendientes (aún no vencen): " + $P{CANTIDAD_PENDIENTES}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+    <noData>
+        <band height="220">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="762" height="40" uuid="a1b2c3d4-1001-1001-1001-100000000051"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="46" width="762" height="1" uuid="a1b2c3d4-1001-1001-1001-100000000052"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="52" width="762" height="20" uuid="a1b2c3d4-1001-1001-1001-100000000053"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[INFORME DE GESTIONES DE COBRANZA]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="76" width="762" height="28" uuid="a1b2c3d4-1001-1001-1001-100000000054"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Filtros aplicados: " + $P{FILTROS_APLICADOS}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="134" width="762" height="20" uuid="a1b2c3d4-1001-1001-1001-100000000055"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="10" isBold="true" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[No hay gestiones registradas en ese rango.]]></text>
+            </staticText>
+        </band>
+    </noData>
+</jasperReport>

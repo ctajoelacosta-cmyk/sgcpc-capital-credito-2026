@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Constancia de devolución de pagaré (E9/Bloque 5, P10, cierre documental; ver
+     docs/diseno_bloque5_E9.md sección 5). Mismo encabezado/fuente/formato que
+     constancia_cancelacion.jrxml (Bloque 2, E8). Se emite al completar el cierre documental de un
+     préstamo ya cancelado/finalizado, cuando se devuelve al cliente su pagaré original.
+     12/10/2026 (pedido de Joel, ajustes chicos del Bloque Cancelación, probado en pantalla):
+     logo + encabezado igual al resto de los PDF; texto directo sin "al/a la Sr./Sra."; nombre
+     del cliente sin mayúsculas forzadas (se arregla en
+     ServicioFormalizacion.generarPdfConstanciaDevolucion, no acá); "N°" -> "N.º".
+     13/10/2026 (hallazgo de Joel): un préstamo FINALIZADO sin "Cancelar todo" (pagó la última
+     cuota normal, sin CAN) imprimía "...cancelada en su totalidad (Constancia de cancelación
+     N.º -)"; mentía, citando una constancia inexistente. El cierre del párrafo
+     (TEXTO_CIERRE_OPERACION) ya viene armado desde Java
+     (ServicioFormalizacion.construirTextoCierreOperacionDevolucion, con prueba unitaria propia,
+     sin base de datos); este archivo solo lo concatena. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="constancia_devolucion" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40">
+
+    <!-- Lote 2, L2-B (14/10/2026, pedido de Joel): encabezado unificado vía subreporte común
+         (encabezado_constancia.jrxml): ver ese archivo y REGLAS_DESARROLLO.md. Pie unificado
+         en pageFooter más abajo ("Emitido por..." + "Página X de Y", mismo patrón que
+         contrato.jrxml). Ningún dato ni texto legal cambia, solo presentación. -->
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <parameter name="REPRESENTANTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="REPRESENTANTE_CEDULA" class="java.lang.String"/>
+    <parameter name="NUMERO_CONSTANCIA_DEVOLUCION" class="java.lang.String"/>
+    <parameter name="FECHA_DEVOLUCION" class="java.lang.String"/>
+    <parameter name="FECHA_DEVOLUCION_LARGA" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="NUMERO_PAGARE" class="java.lang.String"/>
+    <parameter name="MONTO_DESEMBOLSADO" class="java.lang.String"/>
+    <parameter name="FECHA_DESEMBOLSO" class="java.lang.String"/>
+    <parameter name="FECHA_CANCELACION" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <!-- B78 (28/10/2026, hallazgo de Joel del 25/10 en la primera pasada de RF29, aprobado el
+         28/10): la constancia no identificaba a quién entregó físicamente el pagaré. Estaba solo
+         el pie genérico "Emitido por" (un dato automático, no una firma) y las firmas del
+         representante legal y del cliente. Mismo patrón ya aprobado para contrato.jrxml
+         ("QUIEN LE ATENDIÓ") y plan_pagos.jrxml ("Entregado por ... C.I. ..."). -->
+    <parameter name="USUARIO_EMISOR_CEDULA" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+    <!-- 13/10/2026 (pedido de Joel): el cierre del párrafo ya viene armado desde Java
+         (ServicioFormalizacion.construirTextoCierreOperacionDevolucion), probado sin base de
+         datos; este jrxml solo lo concatena, sin decidir nada. -->
+    <parameter name="TEXTO_CIERRE_OPERACION" class="java.lang.String"/>
+
+    <title>
+        <band height="520">
+            <subreport>
+                <reportElement x="0" y="0" width="481" height="92"/>
+                <subreportParameter name="LOGO"><subreportParameterExpression><![CDATA[$P{LOGO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RAZON_SOCIAL"><subreportParameterExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RUC"><subreportParameterExpression><![CDATA[$P{EMPRESA_RUC}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_DOMICILIO"><subreportParameterExpression><![CDATA[$P{EMPRESA_DOMICILIO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_TELEFONO"><subreportParameterExpression><![CDATA[$P{EMPRESA_TELEFONO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_WHATSAPP"><subreportParameterExpression><![CDATA[$P{EMPRESA_WHATSAPP}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="TITULO"><subreportParameterExpression><![CDATA["CONSTANCIA DE DEVOLUCIÓN DE PAGARÉ"]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="NUMERO"><subreportParameterExpression><![CDATA[$P{NUMERO_CONSTANCIA_DEVOLUCION}]]></subreportParameterExpression></subreportParameter>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
+                <subreportExpression class="java.io.InputStream"><![CDATA[Thread.currentThread().getContextClassLoader().getResourceAsStream("reportes/encabezado_constancia.jasper")]]></subreportExpression>
+            </subreport>
+            <textField>
+                <reportElement x="0" y="100" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Asunción, " + $P{FECHA_DEVOLUCION_LARGA}]]></textFieldExpression>
+            </textField>
+            <!-- Pedido de Joel (14/10/2026): la caja declaraba 80pt pero el párrafo real ocupa
+                 3-4 líneas (~56pt a tamaño 10); el resto quedaba en blanco antes de "DATOS DEL
+                 PRÉSTAMO". Achicada a 58 (isStretchWithOverflow sigue activo: si el texto de
+                 cierre más largo necesita más, la caja crece y no se corta). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="122" width="481" height="58"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA["Por la presente, " + $P{EMPRESA_RAZON_SOCIAL} + " deja constancia de haber devuelto a "
++ $P{CLIENTE_NOMBRE} + ", con C.I. N.º " + $P{CLIENTE_CEDULA}
++ ", el pagaré original N.º " + $P{NUMERO_PAGARE} + " correspondiente a la operación " + $P{IDENTIFICADOR_OPERACION}
++ $P{TEXTO_CIERRE_OPERACION}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="188" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[DATOS DEL PRÉSTAMO]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="204" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Monto desembolsado: " + $P{MONTO_DESEMBOLSADO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="204" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Fecha de desembolso: " + $P{FECHA_DESEMBOLSO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="220" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Fecha de cancelación: " + $P{FECHA_CANCELACION}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="262" width="481" height="30"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Con esta entrega, el expediente de la operación queda documentalmente cerrado; el pagaré original ya no queda en poder de la empresa.]]></text>
+            </staticText>
+
+            <line>
+                <reportElement x="0" y="352" width="180" height="1"/>
+            </line>
+            <line>
+                <reportElement x="300" y="352" width="180" height="1"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="356" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{REPRESENTANTE_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="370" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["C.I. N.º " + $P{REPRESENTANTE_CEDULA}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="384" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Representante legal]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="398" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="300" y="356" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Recibí el pagaré original (cliente)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="370" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Firma y aclaración]]></text>
+            </staticText>
+            <!-- D-139 (pedido de Joel): la firma del representante ya mostraba su C.I. debajo
+                 (líneas de arriba); la del cliente no. -->
+            <textField>
+                <reportElement x="300" y="384" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["C.I. N.º " + $P{CLIENTE_CEDULA}]]></textFieldExpression>
+            </textField>
+            <!-- B78 (ver la nota del parámetro USUARIO_EMISOR_CEDULA arriba): tercer bloque de
+                 firma, fila propia debajo de los dos anteriores, en la columna de la empresa
+                 (son roles distintos: el representante legal firma por la empresa, la persona
+                 que atendió firma como quien hizo la entrega física del pagaré). La banda creció
+                 de 428 a 520 para que entre; ningún elemento anterior se movió de lugar. El
+                 espacio libre sobre la línea es de 60pt, el mismo que tienen las dos firmas de
+                 arriba (de lo contrario no hay lugar material para firmar). -->
+            <line>
+                <reportElement x="0" y="472" width="180" height="1"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="476" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{USUARIO_EMISOR}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="490" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["C.I. N.º " + $P{USUARIO_EMISOR_CEDULA}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="504" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Entregó el pagaré]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10 (pedido de Joel, 14/10/2026): ver la nota en constancia_cancelacion.jrxml
+                 (mismo patrón corregido, sin espacio de más). -->
+            <textField>
+                <reportElement x="331" y="0" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="0" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

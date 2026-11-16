@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Informe de Incobrables (Bloque C tanda 1, pedido de Joel): mismo molde que informe_morosidad/
+     informe_cartera.jrxml de arriba. Cinco columnas (operación/cliente/teléfono/C.I./días
+     atraso/monto exigible); el total general (saldo declarado incobrable) va en el resumen
+     final, como texto plano. Celdas de encabezado y detalle con padding desde el arranque (Paso 1
+     del cierre del Bloque B). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="informe_incobrables" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="762"
+              leftMargin="40" rightMargin="40" topMargin="30" bottomMargin="30"
+              whenNoDataType="NoDataSection" uuid="c3e5f7a9-9f1b-4f4c-d57d-b14c6e8a0c8d">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="FILTROS_APLICADOS" class="java.lang.String"/>
+    <parameter name="CANTIDAD_TOTAL" class="java.lang.Integer"/>
+    <parameter name="SALDO_TOTAL" class="java.lang.String"/>
+
+    <field name="identificadorOperacion" class="java.lang.String"/>
+    <field name="clienteNombre" class="java.lang.String"/>
+    <field name="clienteTelefono" class="java.lang.String"/>
+    <field name="clienteCedula" class="java.lang.String"/>
+    <field name="diasAtraso" class="java.lang.Integer"/>
+    <field name="montoExigible" class="java.lang.String"/>
+
+    <title>
+        <band height="140">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="762" height="40" uuid="d4f6a8b0-0001-0001-0001-000000000001"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="46" width="762" height="1" uuid="d4f6a8b0-0001-0001-0001-000000000002"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="52" width="762" height="20" uuid="d4f6a8b0-0001-0001-0001-000000000003"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[INFORME DE INCOBRABLES]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="76" width="762" height="28" uuid="d4f6a8b0-0001-0001-0001-000000000004"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Filtros aplicados: " + $P{FILTROS_APLICADOS}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="108" width="762" height="28" uuid="d4f6a8b0-0001-0001-0001-000000000005"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Emitido: " + $P{FECHA_EMISION} + "  ·  Usuario: " + $P{USUARIO_EMISOR}
++ "  ·  Préstamos incobrables: " + $P{CANTIDAD_TOTAL}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="24">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="75" height="24" backcolor="#DCDCDC" uuid="e5a7b9c1-0002-0002-0002-000000000001"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Operación]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="75" y="0" width="160" height="24" backcolor="#DCDCDC" uuid="e5a7b9c1-0002-0002-0002-000000000002"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Cliente]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="235" y="0" width="80" height="24" backcolor="#DCDCDC" uuid="e5a7b9c1-0002-0002-0002-000000000003"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Teléfono]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="315" y="0" width="85" height="24" backcolor="#DCDCDC" uuid="e5a7b9c1-0002-0002-0002-000000000004"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[C.I.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="400" y="0" width="70" height="24" backcolor="#DCDCDC" uuid="e5a7b9c1-0002-0002-0002-00000000000a">
+                </reportElement>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Días atraso]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="470" y="0" width="292" height="24" backcolor="#DCDCDC" uuid="e5a7b9c1-0002-0002-0002-00000000000b">
+                </reportElement>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Monto exigible]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="13">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="75" height="13" uuid="f6b8c0d2-0003-0003-0003-000000000001"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{identificadorOperacion}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="75" y="0" width="160" height="13" uuid="f6b8c0d2-0003-0003-0003-000000000002"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{clienteNombre}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="235" y="0" width="80" height="13" uuid="f6b8c0d2-0003-0003-0003-000000000003"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{clienteTelefono}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="315" y="0" width="85" height="13" uuid="f6b8c0d2-0003-0003-0003-000000000004"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{clienteCedula}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="400" y="0" width="70" height="13" uuid="f6b8c0d2-0003-0003-0003-00000000000a">
+                </reportElement>
+                <box leftPadding="2" rightPadding="2"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{diasAtraso}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="470" y="0" width="292" height="13" uuid="f6b8c0d2-0003-0003-0003-00000000000b">
+                </reportElement>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{montoExigible}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="500" height="14" uuid="a7c9d1e3-0004-0004-0004-000000000001"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="600" y="0" width="148" height="14" uuid="a7c9d1e3-0004-0004-0004-000000000002"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="748" y="0" width="14" height="14" uuid="a7c9d1e3-0004-0004-0004-000000000003"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <band height="60">
+            <line>
+                <reportElement x="0" y="0" width="762" height="1" uuid="b8d0e2f4-0005-0005-0005-000000000001"/>
+            </line>
+            <textField>
+                <reportElement x="0" y="10" width="500" height="16" uuid="b8d0e2f4-0005-0005-0005-000000000002"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Total: " + $P{CANTIDAD_TOTAL} + " préstamo(s)  —  Saldo declarado incobrable: " + $P{SALDO_TOTAL}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+    <noData>
+        <band height="220">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="762" height="40" uuid="c9d1e3f5-0006-0006-0006-000000000001"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="9"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement positionType="Float" x="0" y="46" width="762" height="1" uuid="c9d1e3f5-0006-0006-0006-000000000002"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="52" width="762" height="20" uuid="c9d1e3f5-0006-0006-0006-000000000003"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="13" isBold="true"/>
+                </textElement>
+                <text><![CDATA[INFORME DE INCOBRABLES]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="76" width="762" height="28" uuid="c9d1e3f5-0006-0006-0006-000000000004"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Filtros aplicados: " + $P{FILTROS_APLICADOS}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="108" width="762" height="14" uuid="c9d1e3f5-0006-0006-0006-000000000005"/>
+                <textElement>
+                    <font fontName="DejaVu Sans" size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Emitido: " + $P{FECHA_EMISION} + "  ·  Usuario: " + $P{USUARIO_EMISOR}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement positionType="Float" x="0" y="134" width="762" height="20" uuid="c9d1e3f5-0006-0006-0006-000000000006"/>
+                <textElement textAlignment="Center">
+                    <font fontName="DejaVu Sans" size="10" isBold="true" isItalic="true"/>
+                </textElement>
+                <text><![CDATA[No hay préstamos incobrables en este momento.]]></text>
+            </staticText>
+        </band>
+    </noData>
+</jasperReport>

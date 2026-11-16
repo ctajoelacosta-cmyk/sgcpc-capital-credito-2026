@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Factura (modelo Financiera Paraguayo Japonesa, D-78, docs/diseno_comprobantes_E8.md sección
+     1). Una línea por concepto gravado y cuota (RN-25/D-85). Todos los importes ya vienen
+     calculados y formateados desde Java (ServicioCobranza.generarPdfFactura, que reconstruye las
+     líneas con reconstruirLineasFactura, D-93): este reporte no calcula ni recalcula nada
+     (REGLAS_DESARROLLO.md §6).
+
+     REDISEÑO 27/10/2026 (pedido del docente y de Joel, RF23/RF33, RN-25, D-89): la factura se
+     veía como "una hoja impresa" y ahora se ve como un formulario de talonario. SOLO
+     PRESENTACIÓN: los mismos parámetros, los mismos campos y los mismos importes. Autoimpresor
+     con timbrado, NO factura electrónica (nada de KuDE, CDC ni QR).
+
+     Cómo se logra el "alto fijo" del talonario (lo único no obvio de este archivo):
+       - La grilla de la tabla (recuadro exterior + las 5 líneas verticales que separan las
+         columnas) se dibuja UNA sola vez en el <background>, a coordenadas fijas (y=206 a
+         y=666). El background no sigue el flujo de las bandas, así que esas verticales bajan
+         hasta el pie de la tabla aunque haya un solo renglón de detalle.
+       - Los totales van en el <columnFooter> con isFloatColumnFooter="false": JasperReports lo
+         imprime al PIE del área de columna, no pegado al último renglón. Por eso las filas de
+         totales cierran siempre abajo, donde terminan las verticales del background.
+       - Para que esa geometría fija valga también en una factura ANULADA, la franja roja dejó de
+         ser un <pageHeader> (que corría todo 46 px hacia abajo) y pasó a ser una franja de alto
+         fijo DENTRO del <title> (y=161..178), que simplemente no se imprime si la factura es
+         válida. El sello diagonal del <background> (punto 7, RF25) no cambió. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="factura" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              isFloatColumnFooter="false"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <!-- Decisión de Joel (27/10/2026, opción B): la actividad económica es un dato PREIMPRESO
+         obligatorio (Decreto 6539/05, art. 19) y ya existía cargada como parámetro del sistema
+         (empresa.actividad). Antes este renglón era el texto fijo "Préstamos personales",
+         escrito a mano acá. Lo pasa ServicioCobranza.generarPdfFactura (solo ese documento). -->
+    <parameter name="EMPRESA_ACTIVIDAD" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <!-- Lote 2, L2-A (14/10/2026, pedido de Joel): logo: ya llega por Java en TODAS las
+         llamadas a llenarYExportar (GeneradorInformesPdf.logoComoBytes), sin tocar
+         ServicioCobranza. -->
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="TIMBRADO_NUMERO" class="java.lang.String"/>
+    <parameter name="TIMBRADO_DESDE" class="java.lang.String"/>
+    <parameter name="TIMBRADO_HASTA" class="java.lang.String"/>
+    <parameter name="FACTURA_NUMERO" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_DOCUMENTO" class="java.lang.String"/>
+    <parameter name="CLIENTE_DOMICILIO" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="NUMERO_RECIBO" class="java.lang.String"/>
+    <parameter name="TOTAL_EXENTA" class="java.lang.String"/>
+    <parameter name="TOTAL_GRAVADA_5" class="java.lang.String"/>
+    <parameter name="IVA_5" class="java.lang.String"/>
+    <parameter name="TOTAL_GRAVADA_10" class="java.lang.String"/>
+    <parameter name="IVA_10" class="java.lang.String"/>
+    <parameter name="TOTAL" class="java.lang.String"/>
+    <parameter name="TOTAL_LETRAS" class="java.lang.String"/>
+    <!-- Punto 3 (RF25, hallazgo de Joel, 12/10/2026): una factura ANULADA nunca sale como válida. -->
+    <parameter name="ANULADA" class="java.lang.Boolean"/>
+    <parameter name="FECHA_ANULACION_FACTURA" class="java.lang.String"/>
+    <!-- Punto 7 (RF25, hallazgo de Joel en pantalla): sello diagonal, mismo criterio que recibo.jrxml. -->
+    <parameter name="MARCA_AGUA" class="byte[]"/>
+    <!-- Lote 2, L2-A Parte 2, punto 3 (14/10/2026, pedido de Joel, autorizado): parámetros
+         NUEVOS para el pie "Emitido por": FECHA_EMISION (arriba) no se toca, sigue siendo
+         el dato legal del cuerpo ("Fecha de emisión"). PIE_FECHA_HORA es la fecha/hora real del
+         registro del pago, nunca la de hoy (D-94). -->
+    <parameter name="PIE_EMITIDO_POR" class="java.lang.String"/>
+    <parameter name="PIE_FECHA_HORA" class="java.lang.String"/>
+
+    <field name="descripcion" class="java.lang.String"/>
+    <field name="importeNeto" class="java.lang.String"/>
+    <field name="iva" class="java.lang.String"/>
+    <field name="total" class="java.lang.String"/>
+
+    <background>
+        <band height="762">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="481" height="762">
+                    <printWhenExpression><![CDATA[$P{ANULADA}]]></printWhenExpression>
+                </reportElement>
+                <imageExpression><![CDATA[$P{MARCA_AGUA}]]></imageExpression>
+            </image>
+            <!-- Grilla del talonario: recuadro de la tabla y las 5 verticales que separan las
+                 columnas, de y=206 (justo debajo del encabezado de la tabla) a y=666 (justo
+                 arriba de la primera fila de totales del columnFooter). Las x son EXACTAMENTE
+                 las mismas que usan el columnHeader, el detail y el columnFooter: 28, 213, 283,
+                 338 y 393. Si se mueve una columna, hay que mover las cuatro. -->
+            <frame>
+                <reportElement x="0" y="206" width="481" height="460"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <line>
+                    <reportElement x="28" y="0" width="1" height="460"/>
+                    <graphicElement><pen lineWidth="0.5" lineColor="#000000"/></graphicElement>
+                </line>
+                <line>
+                    <reportElement x="213" y="0" width="1" height="460"/>
+                    <graphicElement><pen lineWidth="0.5" lineColor="#000000"/></graphicElement>
+                </line>
+                <line>
+                    <reportElement x="283" y="0" width="1" height="460"/>
+                    <graphicElement><pen lineWidth="0.5" lineColor="#000000"/></graphicElement>
+                </line>
+                <line>
+                    <reportElement x="338" y="0" width="1" height="460"/>
+                    <graphicElement><pen lineWidth="0.5" lineColor="#000000"/></graphicElement>
+                </line>
+                <line>
+                    <reportElement x="393" y="0" width="1" height="460"/>
+                    <graphicElement><pen lineWidth="0.5" lineColor="#000000"/></graphicElement>
+                </line>
+            </frame>
+        </band>
+    </background>
+
+    <title>
+        <band height="180">
+
+            <!-- ===== Recuadro 1: emisor + datos del timbrado ===== -->
+            <rectangle radius="6">
+                <reportElement x="0" y="0" width="481" height="78"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="8" y="9" width="44" height="44"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="58" y="7" width="232" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="58" y="22" width="232" height="52"/>
+                <textElement><font fontName="DejaVu Sans" size="6.5"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_ACTIVIDAD}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + "   ·   WhatsApp " + $P{EMPRESA_WHATSAPP}
++ "\n" + $P{EMPRESA_CORREO}]]></textFieldExpression>
+            </textField>
+            <rectangle radius="4">
+                <reportElement x="296" y="6" width="178" height="66"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="299" y="8" width="172" height="27"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="6.5"/></textElement>
+                <textFieldExpression><![CDATA["RUC: " + $P{EMPRESA_RUC}
++ "\nTIMBRADO N.º " + $P{TIMBRADO_NUMERO}
++ "\nVigencia: " + $P{TIMBRADO_DESDE} + " al " + $P{TIMBRADO_HASTA}]]></textFieldExpression>
+            </textField>
+            <line>
+                <reportElement x="296" y="36" width="178" height="1"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#000000"/></graphicElement>
+            </line>
+            <!-- Ojo con el alto de estas dos celdas: JasperReports NO imprime un texto que no
+                 entra a lo alto en su elemento (no lo recorta: lo descarta). Con height="16" la
+                 palabra "FACTURA" en 14 pt desaparecía del PDF. 19 px para 14 pt, 15 px para
+                 10 pt: si se cambia el tamaño de fuente, hay que cambiar el alto. -->
+            <staticText>
+                <reportElement x="299" y="37" width="172" height="19"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="14" isBold="true"/>
+                </textElement>
+                <text><![CDATA[FACTURA]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="299" y="56" width="172" height="15"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="10" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{FACTURA_NUMERO}]]></textFieldExpression>
+            </textField>
+
+            <!-- ===== Recuadro 2: datos del cliente y de la operación ===== -->
+            <rectangle radius="4">
+                <reportElement x="0" y="86" width="481" height="72"/>
+                <graphicElement><pen lineWidth="0.75" lineColor="#000000"/></graphicElement>
+            </rectangle>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="6" y="90" width="236" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7.5"/></textElement>
+                <textFieldExpression><![CDATA["Fecha de emisión: " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="245" y="90" width="230" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7.5"/></textElement>
+                <text><![CDATA[Condición de venta:    CONTADO ☒     CRÉDITO ☐]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="6" y="103" width="469" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7.5"/></textElement>
+                <textFieldExpression><![CDATA["Nombre o razón social: " + $P{CLIENTE_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="6" y="116" width="236" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7.5"/></textElement>
+                <textFieldExpression><![CDATA["RUC / C.I.: " + $P{CLIENTE_DOCUMENTO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="245" y="116" width="230" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7.5"/></textElement>
+                <text><![CDATA[Moneda: Guaraníes]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="6" y="129" width="469" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7.5"/></textElement>
+                <textFieldExpression><![CDATA["Dirección: " + $P{CLIENTE_DOMICILIO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="6" y="142" width="180" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <text><![CDATA[Tipo de transacción: Prestación de servicios]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="190" y="142" width="130" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Operación: " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="324" y="142" width="151" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Recibo asociado: " + $P{NUMERO_RECIBO}]]></textFieldExpression>
+            </textField>
+
+            <!-- ===== Franja de ANULADA (alto fijo, ver el comentario de arriba) ===== -->
+            <textField isStretchWithOverflow="false">
+                <reportElement x="0" y="161" width="481" height="17" mode="Opaque"
+                               backcolor="#8B0000" forecolor="#FFFFFF">
+                    <printWhenExpression><![CDATA[$P{ANULADA}]]></printWhenExpression>
+                </reportElement>
+                <box><pen lineWidth="1" lineColor="#4A0000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="8" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["FACTURA ANULADA el " + $P{FECHA_ANULACION_FACTURA}
++ "  —  Este documento NO es válido como comprobante fiscal."]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <!-- ===== Encabezado de la tabla (gris, dos niveles: "Valor de venta" agrupa las 3 columnas
+         de IVA, igual que el formulario de talonario) ===== -->
+    <columnHeader>
+        <band height="26">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="28" height="26" backcolor="#DCDCDC"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Cant.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="28" y="0" width="185" height="26" backcolor="#DCDCDC"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Descripción]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="213" y="0" width="70" height="26" backcolor="#DCDCDC"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Precio
+unitario]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="283" y="0" width="198" height="12" backcolor="#DCDCDC"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Valor de venta]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="283" y="12" width="55" height="14" backcolor="#DCDCDC"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Exentas]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="338" y="12" width="55" height="14" backcolor="#DCDCDC"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[5 %]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="393" y="12" width="88" height="14" backcolor="#DCDCDC"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[10 %]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <!-- Corrección de Joel (380b400, punto C8): la descripción puede ocupar 2 renglones y sin
+             stretchType el texto se salía del recuadro de su celda mientras las celdas vecinas
+             quedaban con el borde de 1 sola línea. stretchType="RelativeToTallestObject" en los 6
+             elementos hace que todas las celdas (con su recuadro) crezcan juntas hasta la más
+             alta. Solo maquetación: ningún dato ni importe cambia. -->
+        <band height="13">
+            <staticText>
+                <reportElement x="0" y="0" width="28" height="13" stretchType="RelativeToTallestObject"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7"/>
+                </textElement>
+                <text><![CDATA[1]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="28" y="0" width="185" height="13" stretchType="RelativeToTallestObject"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
+            </textField>
+            <!-- Corrección de Joel (error fiscal): "Precio unitario" es el precio CON IVA
+                 incluido: el mismo valor que la columna 10 % (cantidad siempre 1), no el neto. -->
+            <textField>
+                <reportElement x="213" y="0" width="70" height="13" stretchType="RelativeToTallestObject"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="283" y="0" width="55" height="13" stretchType="RelativeToTallestObject"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <text><![CDATA[]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="338" y="0" width="55" height="13" stretchType="RelativeToTallestObject"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <text><![CDATA[]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="393" y="0" width="88" height="13" stretchType="RelativeToTallestObject"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <!-- ===== Totales: van al PIE de la tabla (isFloatColumnFooter="false"), cada uno en su fila
+         enmarcada, con las mismas columnas que el detalle ===== -->
+    <columnFooter>
+        <band height="76">
+            <!-- Fila 1: subtotales por columna de IVA -->
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="283" height="14" backcolor="#DCDCDC"/>
+                <box rightPadding="6"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7.5" isBold="true"/>
+                </textElement>
+                <text><![CDATA[SUBTOTALES]]></text>
+            </staticText>
+            <textField>
+                <reportElement mode="Opaque" x="283" y="0" width="55" height="14" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7.5" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_EXENTA}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement mode="Opaque" x="338" y="0" width="55" height="14" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7.5" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_GRAVADA_5}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement mode="Opaque" x="393" y="0" width="88" height="14" backcolor="#DCDCDC"/>
+                <box rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7.5" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_GRAVADA_10}]]></textFieldExpression>
+            </textField>
+
+            <!-- Fila 2: total de la operación. Decisión de Joel (27/10/2026): $P{TOTAL} (la suma
+                 de las tres columnas), no $P{TOTAL_GRAVADA_10}: hoy dan el mismo número porque
+                 exentas y 5 % son siempre 0, pero TOTAL es el que concuerda con TOTAL_LETRAS. -->
+            <staticText>
+                <reportElement x="0" y="14" width="283" height="16"/>
+                <box rightPadding="6"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="8.5" isBold="true"/>
+                </textElement>
+                <text><![CDATA[TOTAL DE LA OPERACIÓN]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="283" y="14" width="198" height="16"/>
+                <box rightPadding="6"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="10" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL}]]></textFieldExpression>
+            </textField>
+
+            <!-- Fila 3: el mismo total, en letras -->
+            <staticText>
+                <reportElement x="0" y="30" width="100" height="16"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Son (en letras):]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="false">
+                <reportElement x="100" y="30" width="381" height="16"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_LETRAS}]]></textFieldExpression>
+            </textField>
+
+            <!-- Fila 4: liquidación del IVA. "TOTAL IVA" muestra IVA_10 igual que antes (decisión
+                 de Joel, 27/10/2026: no se toca ningún cálculo en este rediseño). -->
+            <staticText>
+                <reportElement x="0" y="46" width="160" height="14"/>
+                <box leftPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7.5" isBold="true"/></textElement>
+                <text><![CDATA[LIQUIDACIÓN DEL IVA]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="160" y="46" width="90" height="14"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7.5"/>
+                </textElement>
+                <textFieldExpression><![CDATA["(5 %)   " + $P{IVA_5}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="250" y="46" width="110" height="14"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7.5"/>
+                </textElement>
+                <textFieldExpression><![CDATA["(10 %)   " + $P{IVA_10}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="360" y="46" width="121" height="14"/>
+                <box leftPadding="4" rightPadding="4"><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7.5" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA["TOTAL IVA   " + $P{IVA_10}]]></textFieldExpression>
+            </textField>
+
+            <!-- Fila 5: ejemplares. Decisión de Joel (27/10/2026, opción 3): dos celdas
+                 enmarcadas, "ORIGINAL" (adquirente) y "COPIA" (archivo tributario), según el
+                 Decreto 6539/05. Antes decía "DUPLICADO: Archivo tributario".
+                 B58 de FASE2_PLAN.md (igualar las palabras con recibo.jrxml y
+                 comprobante_desembolso.jrxml) sigue ABIERTO: esto cambia solo la factura. -->
+            <staticText>
+                <reportElement x="0" y="60" width="240" height="14"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ORIGINAL — CLIENTE]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="240" y="60" width="241" height="14"/>
+                <box><pen lineWidth="0.5" lineColor="#000000"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="7" isBold="true"/>
+                </textElement>
+                <text><![CDATA[COPIA — ARCHIVO TRIBUTARIO]]></text>
+            </staticText>
+        </band>
+    </columnFooter>
+
+    <!-- PA-10/Lote 2 L2-A Parte 2, punto 3 (14/10/2026, pedido de Joel, autorizado): "Emitido
+         por" con los parámetros PIE_EMITIDO_POR/PIE_FECHA_HORA, mismo patrón que el resto de los
+         documentos. -->
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="4" width="300" height="12"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="6.5"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{PIE_EMITIDO_POR} + " — " + $P{PIE_FECHA_HORA}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="331" y="4" width="136" height="12"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="6.5"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="4" width="14" height="12"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font fontName="DejaVu Sans" size="6.5"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

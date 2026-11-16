@@ -1,0 +1,7 @@
+# Copiar este archivo a bd.properties (mismo directorio) y completar la contraseña real.
+# bd.properties esta en .gitignore: no se sube al repositorio.
+# sgcpc_db / sgcpc_user se crean a mano en pgAdmin (no con estos scripts):
+# ver AVANCE.md, decision D-12.
+bd.url=jdbc:postgresql://localhost:5432/sgcpc_db
+bd.usuario=sgcpc_user
+bd.contrasena=

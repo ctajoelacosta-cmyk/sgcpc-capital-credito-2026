@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Encabezado común de las constancias (Lote 2, L2-B, piloto de subreporte pedido por Joel,
+     14/10/2026): logo + datos de la empresa + franja de color institucional + título + "N.º",
+     reutilizado por constancia_cancelacion.jrxml/constancia_devolucion.jrxml/
+     constancia_reversion.jrxml. No se pasa SUBREPORT_DIR desde Java (ningún Service cambia):
+     cada maestro carga este .jasper directo del classpath del webapp con
+     Thread.currentThread().getContextClassLoader().getResourceAsStream("reportes/encabezado_constancia.jasper"),
+     mismo mecanismo que ya usa ServicioCobranza.llenarYExportar para cargar los maestros. El
+     título y el número son literales/parámetros que cada maestro ya tiene: ningún parámetro
+     nuevo de Java. Estilo tomado de contrato.jrxml (posición de logo/datos) +
+     docs/funcionamiento/procesos/lote2_estilo_pdf.md (franja #0C325C, título en ese mismo azul). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="encabezado_constancia" pageWidth="481" pageHeight="92" columnWidth="481"
+              leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="TITULO" class="java.lang.String"/>
+    <parameter name="NUMERO" class="java.lang.String"/>
+
+    <title>
+        <band height="92">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <!-- Pedido de Joel (14/10/2026): el domicilio se partía en 2 líneas dentro de su
+                 propia línea lógica (RUC + domicilio), por el ancho insuficiente a tamaño 9.
+                 Ensanchado al máximo posible dentro de columnWidth (hasta x=481) y letra a 8
+                 (mismo tamaño que usa contrato.jrxml para este mismo bloque) para que cada línea
+                 lógica entre en una sola línea física, sin tapar la franja de abajo. -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="431" height="44"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC} + " — " + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}]]></textFieldExpression>
+            </textField>
+            <rectangle>
+                <reportElement x="0" y="48" width="481" height="5" mode="Opaque" backcolor="#0C325C"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <textField>
+                <reportElement x="0" y="58" width="481" height="18" forecolor="#0C325C"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="12" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TITULO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="78" width="481" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["N.º " + $P{NUMERO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+</jasperReport>

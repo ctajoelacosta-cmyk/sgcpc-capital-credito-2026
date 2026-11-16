@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Constancia de cancelación total (D-93/D-94, docs/diseno_comprobantes_E8.md sección 3). La
+     liquidación se lee de lo guardado en confirmarCancelacionTotal, nunca se recalcula
+     (REGLAS_DESARROLLO.md §6).
+     12/10/2026 (pedido de Joel, ajustes chicos del Bloque Cancelación, probado en pantalla):
+     logo + encabezado igual al resto de los PDF (recibo/factura/constancia_reversion); texto
+     directo sin "el/la Sr./Sra."; nombre del cliente sin mayúsculas forzadas (se arregla en
+     ServicioCobranza.generarPdfConstancia, no acá); "N°" -> "N.º"; total en letras agregado
+     debajo del párrafo (mismo criterio que constancia_reversion.jrxml, punto 3 de RF25). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="constancia_cancelacion" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40">
+
+    <!-- Lote 2, L2-B (14/10/2026, pedido de Joel): encabezado unificado vía subreporte común
+         (encabezado_constancia.jrxml): ver ese archivo y REGLAS_DESARROLLO.md. Pie unificado
+         en pageFooter más abajo ("Emitido por..." + "Página X de Y", mismo patrón que
+         contrato.jrxml). Ningún dato ni texto legal cambia, solo presentación. -->
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <parameter name="REPRESENTANTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="REPRESENTANTE_CEDULA" class="java.lang.String"/>
+    <parameter name="NUMERO_CONSTANCIA" class="java.lang.String"/>
+    <parameter name="FECHA_CANCELACION" class="java.lang.String"/>
+    <parameter name="FECHA_CANCELACION_LARGA" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="MONTO_DESEMBOLSADO" class="java.lang.String"/>
+    <parameter name="FECHA_DESEMBOLSO" class="java.lang.String"/>
+    <parameter name="PLAZO_MESES" class="java.lang.Integer"/>
+    <parameter name="VENCIDAS_IMPAGAS" class="java.lang.String"/>
+    <parameter name="CAPITAL_NO_VENCIDO" class="java.lang.String"/>
+    <parameter name="INTERES_PERIODO" class="java.lang.String"/>
+    <parameter name="IVA_INTERESES" class="java.lang.String"/>
+    <parameter name="TOTAL_CANCELADO" class="java.lang.String"/>
+    <parameter name="TOTAL_CANCELADO_LETRAS" class="java.lang.String"/>
+    <parameter name="NUMERO_RECIBO" class="java.lang.String"/>
+    <parameter name="TIENE_FACTURA" class="java.lang.Boolean"/>
+    <parameter name="FACTURA_NUMERO" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+    <parameter name="LOGO" class="byte[]"/>
+
+    <title>
+        <band height="568">
+            <subreport>
+                <reportElement x="0" y="0" width="481" height="92"/>
+                <subreportParameter name="LOGO"><subreportParameterExpression><![CDATA[$P{LOGO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RAZON_SOCIAL"><subreportParameterExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_RUC"><subreportParameterExpression><![CDATA[$P{EMPRESA_RUC}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_DOMICILIO"><subreportParameterExpression><![CDATA[$P{EMPRESA_DOMICILIO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_TELEFONO"><subreportParameterExpression><![CDATA[$P{EMPRESA_TELEFONO}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="EMPRESA_WHATSAPP"><subreportParameterExpression><![CDATA[$P{EMPRESA_WHATSAPP}]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="TITULO"><subreportParameterExpression><![CDATA["CONSTANCIA DE CANCELACIÓN TOTAL DE PRÉSTAMO"]]></subreportParameterExpression></subreportParameter>
+                <subreportParameter name="NUMERO"><subreportParameterExpression><![CDATA[$P{NUMERO_CONSTANCIA}]]></subreportParameterExpression></subreportParameter>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
+                <subreportExpression class="java.io.InputStream"><![CDATA[Thread.currentThread().getContextClassLoader().getResourceAsStream("reportes/encabezado_constancia.jasper")]]></subreportExpression>
+            </subreport>
+            <textField>
+                <reportElement x="0" y="100" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Asunción, " + $P{FECHA_CANCELACION_LARGA}]]></textFieldExpression>
+            </textField>
+            <!-- Pedido de Joel (14/10/2026): la caja declaraba 70pt pero el párrafo real ocupa
+                 solo 2-3 líneas (~42pt a tamaño 10); el resto quedaba en blanco antes de "Son:".
+                 Achicada a 48 (isStretchWithOverflow sigue activo: si algún nombre de cliente muy
+                 largo necesita más, la caja crece y no se corta). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="122" width="481" height="48"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA["Por la presente, " + $P{EMPRESA_RAZON_SOCIAL} + " deja constancia de que "
++ $P{CLIENTE_NOMBRE} + ", con C.I. N.º " + $P{CLIENTE_CEDULA}
++ ", ha CANCELADO EN SU TOTALIDAD el préstamo que se detalla, no registrando deuda pendiente por esta operación a la fecha."]]></textFieldExpression>
+            </textField>
+            <!-- Pedido de Joel (12/10/2026): total en letras, mismo criterio que
+                 constancia_reversion.jrxml (punto 3, RF25). -->
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="172" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA["Son: " + $P{TOTAL_CANCELADO_LETRAS} + "."]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="196" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[DATOS DEL PRÉSTAMO]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="212" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Operación: " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="212" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Monto desembolsado: " + $P{MONTO_DESEMBOLSADO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="228" width="240" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Fecha de desembolso: " + $P{FECHA_DESEMBOLSO}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="240" y="228" width="241" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Plazo original: " + $P{PLAZO_MESES} + " cuotas mensuales"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="244" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Fecha de cancelación: " + $P{FECHA_CANCELACION}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="0" y="272" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[LIQUIDACIÓN DE LA CANCELACIÓN]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="0" y="290" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Cuotas vencidas impagas (con mora e IVA):]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="290" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{VENCIDAS_IMPAGAS}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="306" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Capital no vencido:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="306" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{CAPITAL_NO_VENCIDO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="322" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Interés del período en curso:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="322" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{INTERES_PERIODO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="338" width="360" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[IVA sobre intereses:]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="360" y="338" width="121" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA[$P{IVA_INTERESES}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="356" width="360" height="16" backcolor="#E8E8E8"/>
+                <textElement><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[TOTAL CANCELADO:]]></text>
+            </staticText>
+            <textField>
+                <reportElement mode="Opaque" x="360" y="356" width="121" height="16" backcolor="#E8E8E8"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_CANCELADO}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="384" width="481" height="30"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Conforme a la Ley N.º 6624/2020, no se cobraron intereses futuros ni penalidades por cancelación anticipada.]]></text>
+            </staticText>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="420" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Comprobantes: Recibo " + $P{NUMERO_RECIBO} + " — Factura: "
++ ($P{TIENE_FACTURA} ? $P{FACTURA_NUMERO} : "no corresponde (sin conceptos gravados)")]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="438" width="481" height="16"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <text><![CDATA[Pagaré: se devuelve al cliente el pagaré original firmado.  [   ]]]></text>
+            </staticText>
+
+            <line>
+                <reportElement x="0" y="490" width="180" height="1"/>
+            </line>
+            <line>
+                <reportElement x="300" y="490" width="180" height="1"/>
+            </line>
+            <!-- Pedido de Joel: debajo de la firma, en 4 líneas: nombre / C.I. / cargo / empresa. -->
+            <textField>
+                <reportElement x="0" y="494" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{REPRESENTANTE_NOMBRE}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="0" y="508" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA["C.I. N.º " + $P{REPRESENTANTE_CEDULA}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="0" y="522" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Representante legal]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="0" y="536" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></textFieldExpression>
+            </textField>
+            <staticText>
+                <reportElement x="300" y="494" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Recibí conforme (cliente)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="300" y="508" width="180" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <text><![CDATA[Firma y aclaración]]></text>
+            </staticText>
+        </band>
+    </title>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10 (pedido de Joel, 14/10/2026): "Página 1 de    1" con espacio de más. Causa
+                 real: el campo del total, alineado a la derecha en una caja de 14pt, deja hueco a
+                 su izquierda cuando el número no llena la caja; y el campo "de " con espacio final
+                 alineado a la derecha empuja ese espacio hacia adentro, sumando un segundo hueco.
+                 Corrección: "de" sin espacio final (termina pegado al borde x=467) + total
+                 alineado a la IZQUIERDA con su propio espacio inicial (" " + número), pegado justo
+                 donde termina "de": sin huecos. Mismo patrón para las 3 constancias. -->
+            <textField>
+                <reportElement x="331" y="0" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="0" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

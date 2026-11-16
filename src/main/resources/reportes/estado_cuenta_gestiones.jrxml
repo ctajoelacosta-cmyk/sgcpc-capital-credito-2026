@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Subreporte del Estado de cuenta (RF34): "Gestiones de cobranza", embebido en el summary de
+     estado_cuenta.jrxml, después del subreporte de Historial (Float). Sin título ni encabezado
+     de empresa propios. Misma fila que /reportes/gestiones (FilaGestionReporte), reusada sin un
+     DTO nuevo. -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="estado_cuenta_gestiones" pageWidth="762" pageHeight="595" columnWidth="762"
+              leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0"
+              whenNoDataType="NoDataSection" uuid="c3d4e5f6-0001-0001-0001-000000000001">
+
+    <field name="fechaHora" class="java.lang.String"/>
+    <field name="contactadoNombre" class="java.lang.String"/>
+    <field name="tipoEtiqueta" class="java.lang.String"/>
+    <field name="resultado" class="java.lang.String"/>
+    <field name="promesaTexto" class="java.lang.String"/>
+    <field name="cumplidaTexto" class="java.lang.String"/>
+    <field name="registradoPorNombre" class="java.lang.String"/>
+
+    <columnHeader>
+        <band height="18">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="0" width="100" height="18" backcolor="#DCDCDC" uuid="c3d4e5f6-0002-0002-0002-000000000001"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Fecha/hora]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="100" y="0" width="130" height="18" backcolor="#DCDCDC" uuid="c3d4e5f6-0002-0002-0002-000000000002"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Contactado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="230" y="0" width="90" height="18" backcolor="#DCDCDC" uuid="c3d4e5f6-0002-0002-0002-000000000003"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Tipo]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="320" y="0" width="170" height="18" backcolor="#DCDCDC" uuid="c3d4e5f6-0002-0002-0002-000000000004"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Resultado]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="490" y="0" width="140" height="18" backcolor="#DCDCDC" uuid="c3d4e5f6-0002-0002-0002-000000000005"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Promesa]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="630" y="0" width="60" height="18" backcolor="#DCDCDC" uuid="c3d4e5f6-0002-0002-0002-000000000006"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Cumplida]]></text>
+            </staticText>
+            <staticText>
+                <reportElement mode="Opaque" x="690" y="0" width="72" height="18" backcolor="#DCDCDC" uuid="c3d4e5f6-0002-0002-0002-000000000007"/>
+                <box leftPadding="3" rightPadding="3"><pen lineWidth="0.5"/></box>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7" isBold="true"/></textElement>
+                <text><![CDATA[Registrado por]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="14">
+            <textField>
+                <reportElement x="0" y="0" width="100" height="14" uuid="c3d4e5f6-0003-0003-0003-000000000001"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{fechaHora}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="100" y="0" width="130" height="14" uuid="c3d4e5f6-0003-0003-0003-000000000002"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{contactadoNombre}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="230" y="0" width="90" height="14" uuid="c3d4e5f6-0003-0003-0003-000000000003"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{tipoEtiqueta}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="320" y="0" width="170" height="14" uuid="c3d4e5f6-0003-0003-0003-000000000004"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{resultado}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="490" y="0" width="140" height="14" uuid="c3d4e5f6-0003-0003-0003-000000000005"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{promesaTexto}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="630" y="0" width="60" height="14" uuid="c3d4e5f6-0003-0003-0003-000000000006"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{cumplidaTexto}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="690" y="0" width="72" height="14" uuid="c3d4e5f6-0003-0003-0003-000000000007"/>
+                <box leftPadding="3" rightPadding="3"/>
+                <textElement verticalAlignment="Middle"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[$F{registradoPorNombre}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <noData>
+        <band height="14">
+            <staticText>
+                <reportElement x="0" y="0" width="400" height="14" uuid="c3d4e5f6-0004-0004-0004-000000000001"/>
+                <textElement><font fontName="DejaVu Sans" size="7" isItalic="true"/></textElement>
+                <text><![CDATA[Sin gestiones registradas.]]></text>
+            </staticText>
+        </band>
+    </noData>
+</jasperReport>

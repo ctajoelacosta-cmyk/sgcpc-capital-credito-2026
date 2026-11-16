@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                              http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <display-name>SGCPC</display-name>
+
+    <listener>
+        <listener-class>py.com.capitalcredito.sgcpc.infraestructura.EscuchaContextoAplicacion</listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>py.com.capitalcredito.sgcpc.filtros.ListenerSesion</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>FiltroCodificacionUtf8</filter-name>
+        <filter-class>py.com.capitalcredito.sgcpc.filtros.FiltroCodificacionUtf8</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FiltroCodificacionUtf8</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>FiltroCsrf</filter-name>
+        <filter-class>py.com.capitalcredito.sgcpc.filtros.FiltroCsrf</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FiltroCsrf</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>FiltroAutenticacion</filter-name>
+        <filter-class>py.com.capitalcredito.sgcpc.filtros.FiltroAutenticacion</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FiltroAutenticacion</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>FiltroAutorizacion</filter-name>
+        <filter-class>py.com.capitalcredito.sgcpc.filtros.FiltroAutorizacion</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FiltroAutorizacion</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>ControladorAutenticacionServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorAutenticacionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorAutenticacionServlet</servlet-name>
+        <url-pattern>/acceso</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorAutenticacionServlet</servlet-name>
+        <url-pattern>/salir</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorCambioContrasenaServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorCambioContrasenaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorCambioContrasenaServlet</servlet-name>
+        <url-pattern>/cambiar-contrasena</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorPanelServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorPanelServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorPanelServlet</servlet-name>
+        <url-pattern>/panel</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorUsuariosServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorUsuariosServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorUsuariosServlet</servlet-name>
+        <url-pattern>/usuarios</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorUsuariosServlet</servlet-name>
+        <url-pattern>/usuarios/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorParametrosServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorParametrosServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorParametrosServlet</servlet-name>
+        <url-pattern>/parametros</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorParametrosServlet</servlet-name>
+        <url-pattern>/parametros/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorClientesServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorClientesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorClientesServlet</servlet-name>
+        <url-pattern>/clientes</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorClientesServlet</servlet-name>
+        <url-pattern>/clientes/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorSolicitudesServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorSolicitudesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorSolicitudesServlet</servlet-name>
+        <url-pattern>/solicitudes</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorSolicitudesServlet</servlet-name>
+        <url-pattern>/solicitudes/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorAprobacionesServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorAprobacionesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorAprobacionesServlet</servlet-name>
+        <url-pattern>/aprobaciones</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorAprobacionesServlet</servlet-name>
+        <url-pattern>/aprobaciones/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorFormalizacionServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorFormalizacionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorFormalizacionServlet</servlet-name>
+        <url-pattern>/formalizacion</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorFormalizacionServlet</servlet-name>
+        <url-pattern>/formalizacion/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorCajaServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorCajaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorCajaServlet</servlet-name>
+        <url-pattern>/caja</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorCajaServlet</servlet-name>
+        <url-pattern>/caja/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorDesembolsoServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorDesembolsoServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorDesembolsoServlet</servlet-name>
+        <url-pattern>/desembolso</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorDesembolsoServlet</servlet-name>
+        <url-pattern>/desembolso/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorReversionesServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorReversionesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorReversionesServlet</servlet-name>
+        <url-pattern>/reversiones</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorReversionesServlet</servlet-name>
+        <url-pattern>/reversiones/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorCobranzaServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorCobranzaServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorCobranzaServlet</servlet-name>
+        <url-pattern>/cobranza</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorCobranzaServlet</servlet-name>
+        <url-pattern>/cobranza/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorMoraServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorMoraServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorMoraServlet</servlet-name>
+        <url-pattern>/mora</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorMoraServlet</servlet-name>
+        <url-pattern>/mora/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorReportesServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorReportesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorReportesServlet</servlet-name>
+        <url-pattern>/reportes</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorReportesServlet</servlet-name>
+        <url-pattern>/reportes/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorPrestamosServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorPrestamosServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorPrestamosServlet</servlet-name>
+        <url-pattern>/prestamos</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorPrestamosServlet</servlet-name>
+        <url-pattern>/prestamos/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorDocumentosServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorDocumentosServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorDocumentosServlet</servlet-name>
+        <url-pattern>/documentos</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorDocumentosServlet</servlet-name>
+        <url-pattern>/documentos/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorCotizadorServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorCotizadorServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorCotizadorServlet</servlet-name>
+        <url-pattern>/cotizador</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ControladorCotizadorServlet</servlet-name>
+        <url-pattern>/cotizador/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorUtilidadesServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorUtilidadesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorUtilidadesServlet</servlet-name>
+        <url-pattern>/utilidades/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ControladorSesionServlet</servlet-name>
+        <servlet-class>py.com.capitalcredito.sgcpc.controladores.ControladorSesionServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ControladorSesionServlet</servlet-name>
+        <url-pattern>/sesion/renovar</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+    </session-config>
+
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- Punto 1c: nunca la pantalla tecnica de Tomcat (stacktrace, nombre de
+         clases, version del servidor) - Doc. 10 §10.18. El error real va solo
+         al log (Tomcat lo hace automaticamente para toda excepcion no atrapada). -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/vistas/error-403.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/WEB-INF/vistas/error-404.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/WEB-INF/vistas/error-500.jsp</location>
+    </error-page>
+    <!-- Portabilidad (pedido de Joel): entrada MÁS específica que la de Throwable de abajo (el
+         contenedor elige la coincidencia de tipo más cercana, no la que aparece primero en este
+         archivo); sin conexión a la base es un problema de configuración del servidor, no un
+         error cualquiera. Ver ErrorConexionBD / FabricaConexionBD / error-bd.jsp. -->
+    <error-page>
+        <exception-type>py.com.capitalcredito.sgcpc.infraestructura.ErrorConexionBD</exception-type>
+        <location>/WEB-INF/vistas/error-bd.jsp</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/WEB-INF/vistas/error-500.jsp</location>
+    </error-page>
+
+</web-app>

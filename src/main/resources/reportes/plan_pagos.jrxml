@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="plan_pagos" pageWidth="595" pageHeight="842" columnWidth="481" leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40" isSummaryWithPageHeaderAndFooter="true" uuid="f6acb32b-89c6-4f03-a5e2-e3cad9b31369">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+	<parameter name="EMPRESA_RUC" class="java.lang.String"/>
+	<parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+	<parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+	<parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+	<parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+	<parameter name="EMPRESA_REGISTRO_BCP" class="java.lang.String"/>
+	<parameter name="EMPRESA_NOMBRE_COMERCIAL" class="java.lang.String"/>
+	<parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+	<parameter name="FECHA_FORMALIZACION" class="java.lang.String"/>
+	<parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+	<parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+	<parameter name="MONTO_APROBADO" class="java.lang.String"/>
+	<parameter name="MONTO_APROBADO_LETRAS" class="java.lang.String"/>
+	<parameter name="PLAZO_MESES" class="java.lang.Integer"/>
+	<parameter name="TEA" class="java.lang.String"/>
+	<parameter name="TNA" class="java.lang.String"/>
+	<parameter name="CFT" class="java.lang.String"/>
+	<parameter name="TOTAL_CAPITAL" class="java.lang.String"/>
+	<parameter name="TOTAL_INTERES" class="java.lang.String"/>
+	<parameter name="TOTAL_IVA" class="java.lang.String"/>
+	<parameter name="TOTAL_A_PAGAR" class="java.lang.String"/>
+	<parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+	<parameter name="USUARIO_EMISOR_CEDULA" class="java.lang.String"/>
+	<parameter name="FECHA_EMISION" class="java.lang.String"/>
+	<!-- Lote 2, L2-C (14/10/2026, pedido de Joel, autorizado): logo: ya llega por Java en
+	     TODAS las llamadas a llenarYExportar, sin tocar código. -->
+	<parameter name="LOGO" class="byte[]"/>
+	<field name="numeroCuota" class="java.lang.Integer"/>
+	<field name="fechaVencimiento" class="java.lang.String"/>
+	<field name="capital" class="java.lang.String"/>
+	<field name="interes" class="java.lang.String"/>
+	<field name="iva" class="java.lang.String"/>
+	<field name="total" class="java.lang.String"/>
+	<field name="saldoPosterior" class="java.lang.String"/>
+	<title>
+            <!-- B120 (07/11/2026, hallazgo de Joel al revisar la muestra): este bloque estaba en
+             size 9 y el domicilio no entraba en los 280 pt del campo, asi que se partia en dos
+             lineas ("...Barrio Obrero," / "Asuncion"). NO lo causo el membrete de continuacion:
+             la banda title quedo identica a HEAD, verificado. Es preexistente.
+             No se puede ensanchar el campo: termina en x=330 y la placa azul arranca en 331. Baja
+             a size 8, que es lo que usa contrato.jrxml con el MISMO ancho de 280 y donde el
+             domicilio si entra en una linea. Ancho verificado renderizando. -->
+            
+		<band height="170">
+			<image scaleImage="RetainShape" onErrorType="Blank">
+				<reportElement x="0" y="0" width="42" height="42"/>
+				<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+			</image>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="50" y="0" width="280" height="66" uuid="2e54b28b-7d12-410b-b81d-75b9dd245144"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}
++ "\n" + $P{EMPRESA_CORREO}
++ "\nRegistro BCP: " + $P{EMPRESA_REGISTRO_BCP}]]></textFieldExpression>
+			</textField>
+			<!-- Lote 2, L2-C (14/10/2026, pedido de Joel, autorizado): recuadro azul con letra
+			     blanca, igual que pagaré/recibo (antes gris #E8E8E8). -->
+			<staticText>
+				<reportElement mode="Opaque" x="331" y="0" width="150" height="16" backcolor="#0C325C" forecolor="#FFFFFF" uuid="fe6c9770-7624-4af1-8a95-cd425a8f0d73"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PLAN DE PAGOS]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="331" y="17" width="150" height="16" backcolor="#0C325C" forecolor="#FFFFFF" uuid="6d621119-a8d4-4f3d-bef3-258062f6c5e9"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["N.º " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+			</textField>
+			<!-- PA-10/Lote 2 (pedido de Joel): franja de color institucional en vez de la línea
+			     simple; el título "PLAN DE PAGOS" (debajo) pasa al mismo azul. -->
+			<rectangle>
+				<reportElement positionType="Float" x="0" y="74" width="481" height="5" mode="Opaque" backcolor="#0C325C" uuid="e262620b-50a5-413f-a0c6-927e30995162"/>
+				<graphicElement><pen lineWidth="0.0"/></graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="81" width="481" height="18" forecolor="#0C325C" uuid="36cae18d-9fd7-4ffe-befa-e9da68dc8d7d"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PLAN DE PAGOS]]></text>
+			</staticText>
+			<textField>
+				<reportElement positionType="Float" x="0" y="99" width="481" height="14" uuid="e0ad173e-15f1-4a04-be52-c774b50d676d"/>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Operación N.º " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="0" y="113" width="240" height="52" uuid="fb9bcc64-f9c5-4d3d-b78c-0481ad1e0475"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Cliente: " + $P{CLIENTE_NOMBRE} + " — C.I. " + $P{CLIENTE_CEDULA}
++ "\nMonto del préstamo: " + $P{MONTO_APROBADO}
++ "\n(" + $P{MONTO_APROBADO_LETRAS} + ")"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" x="240" y="113" width="240" height="52" uuid="c7cbe794-736d-4eaa-a1b9-add3e00e6eef"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Plazo: " + $P{PLAZO_MESES} + " cuotas mensuales · Sistema francés"
++ "\nTEA " + $P{TEA} + " · TNA " + $P{TNA} + " · CFT " + $P{CFT}
++ "\nFecha de formalización: " + $P{FECHA_FORMALIZACION}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<!-- B120 (B86; extension de la opcion (b) de B12, pedida por Joel el 07/11/2026). Mismo
+		     caso que el contrato: este reporte tiene el membrete completo en la banda "title" y
+		     este pageHeader solo se ve de la pagina 2 en adelante, pero la BANDA reserva su altura
+		     declarada igual (las bandas no admiten printWhenExpression, solo los elementos), asi
+		     que dejaba un hueco de ese tamano en la pagina 1. Pasa de 80 a 28 pt con el mismo
+		     membrete de continuacion que el contrato: logo chico, razon social y el numero del
+		     documento, con una linea debajo. No se pierde nada: RUC, domicilio, telefono y Registro
+		     BCP siguen en la pagina 1.
+		     Ancho del numero medido contra el identificador real, de formato fijo CC-AAAA-NNNNN
+		     (13 caracteres): "PLAN DE PAGOS N.o " mas eso son 31 caracteres, 5 mas que el contrato,
+		     por eso el campo va a 200 pt y la razon social termina antes, en x=245. -->
+		<band height="28">
+			<frame>
+				<reportElement x="0" y="0" width="481" height="28">
+					<printWhenExpression><![CDATA[$V{PAGE_NUMBER}.intValue() != 1]]></printWhenExpression>
+				</reportElement>
+				<box><pen lineWidth="0.0"/></box>
+				<image scaleImage="RetainShape" onErrorType="Blank">
+					<reportElement x="0" y="2" width="20" height="20"/>
+					<imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+				</image>
+				<textField>
+					<reportElement x="26" y="6" width="219" height="12"/>
+					<textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+					<textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="281" y="6" width="200" height="12"/>
+					<textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+					<textFieldExpression><![CDATA["PLAN DE PAGOS N.º " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+				</textField>
+				<line>
+					<reportElement x="0" y="26" width="481" height="1"/>
+				</line>
+			</frame>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="18">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="30" height="16" backcolor="#DCDCDC" uuid="1a954a53-81ca-4011-86dc-ab4720e16560"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[N.º]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="30" y="0" width="65" height="16" backcolor="#DCDCDC" uuid="7ef4b724-47c3-484b-93b7-3cb9ff8cc001"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vencimiento]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="95" y="0" width="75" height="16" backcolor="#DCDCDC" uuid="9a354cb5-84e3-4d8b-bb6f-d07e19eae229"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Capital]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="170" y="0" width="75" height="16" backcolor="#DCDCDC" uuid="721a6b7b-88b0-4695-84ae-9fd8b16f2b43"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Interés]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="245" y="0" width="65" height="16" backcolor="#DCDCDC" uuid="45663d11-1b6f-4214-801b-0f968baa2d53"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[IVA 10 %]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="310" y="0" width="80" height="16" backcolor="#DCDCDC" uuid="8593d61a-175b-4931-9054-77c6d3ede522"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total cuota]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="390" y="0" width="91" height="16" backcolor="#DCDCDC" uuid="6c845355-8833-460f-a9ea-e673b42d7d4f"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo según plan]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="16">
+			<textField>
+				<reportElement x="0" y="0" width="30" height="16" uuid="d9f463c5-58c6-45db-ad84-0b5ecee773e0"/>
+				<box>
+					<pen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numeroCuota}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="30" y="0" width="65" height="16" uuid="29b108f8-810a-4f8a-afdb-38b1efdd7bfc"/>
+				<box>
+					<pen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{fechaVencimiento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="95" y="0" width="75" height="16" uuid="b9cf4b9a-e1f2-4ce5-b309-3950f2a8c664"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{capital}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="170" y="0" width="75" height="16" uuid="c7e32339-bd3b-4f1f-9a1d-610f2e15eb99"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{interes}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="245" y="0" width="65" height="16" uuid="7eccf99e-a7c6-459e-a6fd-002e50e755bb"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{iva}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="310" y="0" width="80" height="16" uuid="f8e7695e-f59a-4343-bac7-4ac8d4addb3e"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="390" y="0" width="91" height="16" uuid="bee94594-0d26-41c4-8c6a-fbd9eb4f1aef"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{saldoPosterior}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="20">
+			<textField>
+				<reportElement x="0" y="0" width="300" height="14" uuid="0897eb28-652a-4c74-a1f4-25f6b12691fd"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+			</textField>
+			<!-- PA-10 (pedido de Joel, Lote 2 L2-C): "de" sin espacio final, total alineado a la
+			     izquierda. -->
+			<textField>
+				<reportElement x="331" y="0" width="136" height="14" uuid="ae43a3ca-dad8-480e-aa22-010f158ed3e2"/>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="467" y="0" width="14" height="14" uuid="3e183b3c-f52e-487b-907b-3bb0292bb1a5"/>
+				<textElement textAlignment="Left">
+					<font fontName="DejaVu Sans" size="7"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="148">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="0" width="95" height="16" backcolor="#DCDCDC" uuid="b7577590-bf57-4b0b-b6e7-cc1db9935a0e"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="95" y="0" width="75" height="16" backcolor="#DCDCDC" uuid="9fa9d8d7-4338-4343-83d3-6d48545db75a"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{TOTAL_CAPITAL}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="170" y="0" width="75" height="16" backcolor="#DCDCDC" uuid="6f930b1b-be56-4278-8e27-966d6d4291e2"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{TOTAL_INTERES}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="245" y="0" width="65" height="16" backcolor="#DCDCDC" uuid="cdefcfaa-0270-4b47-8732-23da9ae02607"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{TOTAL_IVA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Opaque" x="310" y="0" width="80" height="16" backcolor="#DCDCDC" uuid="3910f43f-8bee-46a9-b051-537f904f0606"/>
+				<box rightPadding="4">
+					<pen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right">
+					<font fontName="DejaVu Sans" size="8" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{TOTAL_A_PAGAR}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Opaque" x="390" y="0" width="91" height="16" backcolor="#DCDCDC" uuid="38180323-4f52-493f-b529-57b0930cf3ed"/>
+				<box>
+					<pen lineWidth="0.5"/>
+				</box>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="Float" x="0" y="24" width="481" height="60" uuid="ba292930-ab06-4fb7-a575-ea1d9f52a614"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="7"/>
+				</textElement>
+				<text><![CDATA[1. Los pagos se realizan en efectivo en el local de la empresa. Si el vencimiento cae en día inhábil, se paga el siguiente día hábil sin recargo.
+2. Pasado el vencimiento se cobran intereses moratorios y punitorios según la cláusula QUINTA del contrato.
+3. Puede cancelar o adelantar pagos en cualquier momento sin penalidad ni intereses futuros (Ley 6624/2020).
+4. La columna "Saldo según plan" es el saldo programado de este plan original. No refleja pagos realizados; ver estado de cuenta.]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="Float" x="0" y="94" width="220" height="1" uuid="5b7eda35-2c86-4a4f-aa30-1524bd8cf827"/>
+			</line>
+			<textField>
+				<reportElement positionType="Float" x="0" y="98" width="380" height="14" uuid="7a46b166-89d5-43a7-8a0c-3cf7b72b5091"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Recibí copia de este plan de pagos. " + $P{CLIENTE_NOMBRE} + " — C.I. " + $P{CLIENTE_CEDULA}]]></textFieldExpression>
+			</textField>
+			<!-- E (reprueba Lote 1, pedido de Joel): firma de quien atendió, además del "Recibí
+				 copia" del cliente. -->
+			<line>
+				<reportElement positionType="Float" x="0" y="116" width="220" height="1"/>
+			</line>
+			<textField>
+				<reportElement positionType="Float" x="0" y="120" width="380" height="14"/>
+				<textElement>
+					<font fontName="DejaVu Sans" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Entregado por " + $P{USUARIO_EMISOR} + " — C.I. " + $P{USUARIO_EMISOR_CEDULA}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

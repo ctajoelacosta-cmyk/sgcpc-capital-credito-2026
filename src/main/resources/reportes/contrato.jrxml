@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Contrato de préstamo de dinero (D-70, docs/diseno_reportes_e5.md, aprobado por Joel).
+     Ningún cálculo acá: todo llega ya calculado/formateado desde ServicioFormalizacion
+     (REGLAS_DESARROLLO.md 6). Cada cláusula es una fila del datasource (List de ClausulaReporte, ya armada
+     en Java con su numeración): un documento tan largo no cabe en una sola banda "detail",
+     así que JasperReports pagina fila por fila. Fuente DejaVu Sans (jasperreports-fonts, D-68). -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="contrato" pageWidth="595" pageHeight="842" columnWidth="481"
+              leftMargin="57" rightMargin="57" topMargin="40" bottomMargin="40"
+              isSummaryWithPageHeaderAndFooter="true">
+
+    <!-- L1 Paso 3a (pedido de Joel, piloto): escudo a la izquierda del bloque de empresa (título
+         de la página 1 y encabezado repetido de las páginas siguientes), el texto corrido para no
+         encimarse. Solo el escudo: el nombre ya va en EMPRESA_RAZON_SOCIAL. -->
+    <parameter name="LOGO" class="byte[]"/>
+    <parameter name="EMPRESA_RAZON_SOCIAL" class="java.lang.String"/>
+    <parameter name="EMPRESA_RUC" class="java.lang.String"/>
+    <parameter name="EMPRESA_DOMICILIO" class="java.lang.String"/>
+    <parameter name="EMPRESA_TELEFONO" class="java.lang.String"/>
+    <parameter name="EMPRESA_WHATSAPP" class="java.lang.String"/>
+    <parameter name="EMPRESA_CORREO" class="java.lang.String"/>
+    <parameter name="EMPRESA_REGISTRO_BCP" class="java.lang.String"/>
+    <parameter name="EMPRESA_REPRESENTANTE" class="java.lang.String"/>
+    <parameter name="IDENTIFICADOR_OPERACION" class="java.lang.String"/>
+    <parameter name="FECHA_FORMALIZACION_LETRAS" class="java.lang.String"/>
+    <parameter name="CLIENTE_NOMBRE" class="java.lang.String"/>
+    <parameter name="CLIENTE_CEDULA" class="java.lang.String"/>
+    <parameter name="CLIENTE_DOMICILIO" class="java.lang.String"/>
+    <parameter name="CLIENTE_TELEFONO" class="java.lang.String"/>
+    <parameter name="MONTO_APROBADO" class="java.lang.String"/>
+    <parameter name="PLAZO_MESES" class="java.lang.Integer"/>
+    <parameter name="PRIMERA_FECHA_VENCIMIENTO" class="java.lang.String"/>
+    <parameter name="ULTIMA_FECHA_VENCIMIENTO" class="java.lang.String"/>
+    <parameter name="TEA" class="java.lang.String"/>
+    <parameter name="TNA" class="java.lang.String"/>
+    <parameter name="CFT" class="java.lang.String"/>
+    <parameter name="CUOTA_1" class="java.lang.String"/>
+    <parameter name="TOTAL_A_PAGAR" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR" class="java.lang.String"/>
+    <parameter name="USUARIO_EMISOR_CEDULA" class="java.lang.String"/>
+    <parameter name="FECHA_EMISION" class="java.lang.String"/>
+
+    <field name="encabezado" class="java.lang.String"/>
+    <field name="texto" class="java.lang.String"/>
+
+    <!-- Corrección de Joel (ítem 2): el encabezado de empresa va SIEMPRE arriba de todo, incluida
+         la página de firmas (isSummaryWithPageHeaderAndFooter). El título grande, el recuadro
+         resumen y la presentación de las partes son exclusivos de la página 1: la banda "title"
+         de JasperReports ya se imprime una sola vez, antes del pageHeader de la página 1, así
+         que acá va el letterhead chico PRIMERO (dentro del propio title) y el contenido grande
+         debajo, sin necesidad de positionType Float ni printWhenExpression (no colapsaban
+         el hueco correctamente cuando se probó con el PDF real, corrección ítem 5). -->
+    <title>
+        <!-- Corrección de Joel (ítem 1, segunda vuelta): el letterhead ahora es un bloque de 6
+             líneas FIJAS (cada dato en su propia línea, sin concatenar dos datos por línea) para
+             que no se parta de forma impredecible; isStretchWithOverflow lo deja crecer si algún
+             dato individual igual se envuelve. La raya y todo lo de abajo son positionType="Float"
+             en cascada, con ~8pt de margen fijo entre bloques, así que si el letterhead crece la
+             raya baja con él en vez de superponerse (antes tenían Y fija). -->
+        <band height="166" splitType="Stretch">
+            <image scaleImage="RetainShape" onErrorType="Blank">
+                <reportElement x="0" y="0" width="42" height="42"/>
+                <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+            </image>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="280" height="66"/>
+                <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}
++ "\nRUC " + $P{EMPRESA_RUC}
++ "\n" + $P{EMPRESA_DOMICILIO}
++ "\nTel. " + $P{EMPRESA_TELEFONO} + " · WhatsApp " + $P{EMPRESA_WHATSAPP}
++ "\n" + $P{EMPRESA_CORREO}
++ "\nRegistro BCP: " + $P{EMPRESA_REGISTRO_BCP}]]></textFieldExpression>
+            </textField>
+            <!-- Lote 2, L2-C (14/10/2026, pedido de Joel, autorizado): recuadro azul con letra
+                 blanca, igual que pagaré/plan de pagos (antes gris #E8E8E8). -->
+            <staticText>
+                <reportElement x="331" y="0" width="150" height="16" mode="Opaque" backcolor="#0C325C" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <text><![CDATA[CONTRATO DE PRÉSTAMO]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="331" y="17" width="150" height="16" mode="Opaque" backcolor="#0C325C" forecolor="#FFFFFF"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["N.º " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+            </textField>
+            <!-- Lote 2, L2-C (14/10/2026, pedido de Joel, autorizado): franja de color
+                 institucional en vez de la línea fina negra. -->
+            <rectangle>
+                <reportElement positionType="Float" x="0" y="74" width="481" height="5" mode="Opaque" backcolor="#0C325C"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+
+            <staticText>
+                <reportElement positionType="Float" x="0" y="83" width="481" height="18" forecolor="#0C325C"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="13" isBold="true"/></textElement>
+                <text><![CDATA[CONTRATO DE PRÉSTAMO DE DINERO]]></text>
+            </staticText>
+
+            <rectangle>
+                <reportElement positionType="Float" x="0" y="109" width="481" height="54" mode="Opaque" backcolor="#F2F2F2"/>
+            </rectangle>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="6" y="113" width="469" height="46"/>
+                <textElement><font fontName="DejaVu Sans" size="9"/></textElement>
+                <textFieldExpression><![CDATA["Monto del préstamo: " + $P{MONTO_APROBADO} + "     Plazo: " + $P{PLAZO_MESES} + " cuotas\n"
++ "Cuota (1.ª, con IVA): " + $P{CUOTA_1} + "     TEA: " + $P{TEA} + " / TNA: " + $P{TNA} + " / CFT: " + $P{CFT} + "\n"
++ "Total a pagar: " + $P{TOTAL_A_PAGAR} + "\n"
++ "Primer vencimiento: " + $P{PRIMERA_FECHA_VENCIMIENTO} + "     Último vencimiento: " + $P{ULTIMA_FECHA_VENCIMIENTO}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <pageHeader>
+        <!-- B12 (B86, tramo 4; opcion (b) elegida por Joel el 07/11/2026). Membrete de
+             CONTINUACION: en las paginas 2 y siguientes alcanza con decir de que documento se
+             trata, porque la pagina 1 ya trae el membrete completo (RUC, domicilio, telefono y
+             Registro BCP) en la banda "title".
+             Por que esto achica el hueco de la pagina 1: las BANDAS de JasperReports no admiten
+             printWhenExpression, solo los elementos, asi que esta banda reserva su altura
+             declarada aunque el frame de adentro se oculte en la pagina 1. Al pasar de 80 a 28 pt,
+             el hueco entre el recuadro del resumen y "En la ciudad de..." baja de 83 a 31 pt
+             (medido renderizando, no estimado). Los 31 que quedan son la reserva de estos 28 mas
+             el espaciado; eliminarlos del todo exige el subreporte comun de encabezado, que quedo
+             registrado aparte como B119 (es el PA-11 del lote 2) y alcanza tambien a
+             plan_pagos.jrxml y pagare.jrxml, que tienen el mismo pageHeader de 80.
+             El ancho del numero se midio contra el identificador real, de formato fijo
+             CC-AAAA-NNNNN (13 caracteres): "CONTRATO N.o " mas eso son 26 caracteres, y el campo
+             tiene 171 pt. Los campos no se pisan: la razon social termina en x=300 y el numero
+             arranca en x=310. -->
+        <band height="28">
+            <frame>
+                <reportElement x="0" y="0" width="481" height="28">
+                    <printWhenExpression><![CDATA[$V{PAGE_NUMBER}.intValue() != 1]]></printWhenExpression>
+                </reportElement>
+                <box><pen lineWidth="0.0"/></box>
+                <image scaleImage="RetainShape" onErrorType="Blank">
+                    <reportElement x="0" y="2" width="20" height="20"/>
+                    <imageExpression><![CDATA[$P{LOGO}]]></imageExpression>
+                </image>
+                <textField>
+                    <reportElement x="26" y="6" width="274" height="12"/>
+                    <textElement><font fontName="DejaVu Sans" size="8"/></textElement>
+                    <textFieldExpression><![CDATA[$P{EMPRESA_RAZON_SOCIAL}]]></textFieldExpression>
+                </textField>
+                <textField>
+                    <reportElement x="310" y="6" width="171" height="12"/>
+                    <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="8" isBold="true"/></textElement>
+                    <textFieldExpression><![CDATA["CONTRATO N.º " + $P{IDENTIFICADOR_OPERACION}]]></textFieldExpression>
+                </textField>
+                <line>
+                    <reportElement x="0" y="26" width="481" height="1"/>
+                </line>
+            </frame>
+        </band>
+    </pageHeader>
+
+    <detail>
+        <!-- splitType="Prevent" (corrección de Joel, ítem 6): cada cláusula es atómica, nunca se
+             parte a la mitad entre dos páginas. Corrección ítem 2 (segunda vuelta): la banda
+             estaba declarada a 90pt fijos aunque la cláusula fuera corta, y eso dejaba más hueco
+             entre cláusulas cortas (p. ej. PRIMERA-SEGUNDA, OCTAVA-NOVENA-DÉCIMA) que entre las
+             demás. Con la altura mínima (30 = 14 del encabezado + 16 de una sola línea) y
+             isStretchWithOverflow, cada cláusula ocupa solo lo que su texto realmente necesita, más
+             un margen fijo de 6pt abajo (la altura declarada de la banda es un mínimo, nunca se
+             achica más) para no dejarlas totalmente pegadas. Las primeras filas del datasource
+             (Java, ServicioFormalizacion) son la presentación de las partes y la frase "convienen
+             celebrar...", sin encabezado: removeLineWhenBlank + positionType="Float" en el
+             encabezado hace que no dejen una línea en negrita vacía y el texto suba a y="0". -->
+        <band height="36" splitType="Prevent">
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" isRemoveLineWhenBlank="true" x="0" y="0" width="481" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="10" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{encabezado}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="0" y="14" width="481" height="16"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <textFieldExpression><![CDATA[$F{texto}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="20">
+            <textField>
+                <reportElement x="0" y="0" width="300" height="14"/>
+                <textElement><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Emitido por: " + $P{USUARIO_EMISOR} + " — " + $P{FECHA_EMISION}]]></textFieldExpression>
+            </textField>
+            <!-- PA-10/Lote 2 (pedido de Joel, L2-C): "de" sin espacio final, total alineado a la
+                 izquierda, mismo arreglo que el resto de los reportes. -->
+            <textField>
+                <reportElement x="331" y="0" width="136" height="14"/>
+                <textElement textAlignment="Right"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " de"]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="467" y="0" width="14" height="14"/>
+                <textElement textAlignment="Left"><font fontName="DejaVu Sans" size="7"/></textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+    <summary>
+        <!-- splitType="Prevent" (corrección de Joel, ítem 6): el párrafo de cierre y las firmas
+             nunca se parten entre dos páginas. Posiciones relativas (positionType="Float") en vez
+             de huecos fijos absolutos (corrección ítem 5). -->
+        <band height="136" splitType="Prevent">
+
+            <staticText>
+                <reportElement x="0" y="0" width="481" height="28"/>
+                <textElement textAlignment="Justified"><font fontName="DejaVu Sans" size="10"/></textElement>
+                <text><![CDATA[En prueba de conformidad, se firman dos ejemplares de un mismo tenor y a un solo efecto, en el lugar y fecha indicados.]]></text>
+            </staticText>
+
+            <!-- Firmas de ACREEDOR y DEUDOR, centradas: dos columnas de 130 repartidas
+                 simétricamente en el ancho útil de 481 (74pt de margen a cada lado y entre
+                 ambas). -->
+            <line>
+                <reportElement positionType="Float" x="74" y="32" width="130" height="1"/>
+            </line>
+            <line>
+                <reportElement positionType="Float" x="278" y="32" width="130" height="1"/>
+            </line>
+
+            <staticText>
+                <reportElement positionType="Float" x="74" y="36" width="130" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[EL ACREEDOR]]></text>
+            </staticText>
+            <staticText>
+                <reportElement positionType="Float" x="278" y="36" width="130" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[EL DEUDOR]]></text>
+            </staticText>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="74" y="50" width="130" height="28"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{EMPRESA_REPRESENTANTE} + "\np/ " + $P{EMPRESA_RAZON_SOCIAL}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="278" y="50" width="130" height="28"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{CLIENTE_NOMBRE} + "\nC.I. " + $P{CLIENTE_CEDULA}]]></textFieldExpression>
+            </textField>
+
+            <!-- E (reprueba Lote 1, pedido de Joel): firma de quien atendió, fila propia debajo
+                 de las dos anteriores (acreedor/deudor), sin quitar la firma del representante
+                 (son roles distintos: el representante firma como EL ACREEDOR, la persona que
+                 atendió firma como responsable de la operación). Columna del DEUDOR, ya centrada. -->
+            <line>
+                <reportElement positionType="Float" x="278" y="78" width="130" height="1"/>
+            </line>
+            <staticText>
+                <reportElement positionType="Float" x="278" y="82" width="130" height="14"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="9" isBold="true"/></textElement>
+                <text><![CDATA[QUIEN LE ATENDIÓ]]></text>
+            </staticText>
+            <textField isStretchWithOverflow="true">
+                <reportElement positionType="Float" x="278" y="96" width="130" height="28"/>
+                <textElement textAlignment="Center"><font fontName="DejaVu Sans" size="8"/></textElement>
+                <textFieldExpression><![CDATA[$P{USUARIO_EMISOR} + "\nC.I. " + $P{USUARIO_EMISOR_CEDULA}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </summary>
+</jasperReport>

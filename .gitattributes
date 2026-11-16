@@ -1,0 +1,18 @@
+# Archivos/carpetas que no viajan en "git archive" (lo usa preparar_entrega.sh para armar la
+# copia limpia para el tutor), aunque sigan versionados normalmente en git -- esto solo afecta
+# ese export puntual, no el seguimiento ni el historial normal.
+#
+# CLAUDE.md: por las dudas, aunque .gitignore ya evita que vuelva a entrar como archivo nuevo --
+# si sigue habiendo una copia tracked de una sesion anterior, esto la saca igual del export.
+# AVANCE.md: bitacora interna del trabajo (no es parte de la tesis).
+# .gitignore/.gitattributes: archivos de control de versiones, no hacen falta en la copia de
+# entrega (este mismo archivo nombra "CLAUDE.md" para la regla de arriba -- sin esto, esa
+# mención aparecería igual en la copia aunque sea solo una instrucción para git, no un dato).
+# docs/funcionamiento/: documentacion de como funciona cada RF para el trabajo de desarrollo
+# (guion de defensa, pruebas en pantalla, historial de commits/tags) -- revisar si Joel quiere
+# conservar algo de ahi (ej. los guiones de defensa) como documento aparte antes de entregar.
+CLAUDE.md export-ignore
+AVANCE.md export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
+docs/funcionamiento export-ignore
